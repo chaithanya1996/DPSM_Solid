@@ -1,72 +1,76 @@
 #include "dpsm_helpers.hpp"
 
+// ------------------------------------------------------------------//
+//----- Note : You Need The Default argument values in Header only--//
+// ----------------------------------------------------------------//
 
 
 // ------------------------------------------------------------------//
 // --------------Basic Arthemetic on Defined Fucntion---------------//
 // ----------------------------------------------------------------//
-
-cx_3d add_cx_3d (cx_3d former, cx_3d latter){
+template <typename T>
+cx_3d<T> add_cx_3d (cx_3d<T> former, cx_3d<T> latter){
   // No Explicit Checking is Defined and Dev is asssumed to  Use fucntions sane manner
-  double lend_cx_3d = former.size();
-  cx_3d ret_data(lend_cx_3d,cx_mat(size(former[0])));
-  for(size_t i = 0; i < lend_cx_3d; i++){
+  int lend_cx_3d = former.size();
+  cx_3d<T> ret_data(lend_cx_3d,Mat<std::complex<T>>(size(former[0])));
+  for(int i = 0; i < lend_cx_3d; i++){
     ret_data[i] = former[i] + latter[i];
   }
   return(ret_data);
 }
 
+// Explicit Instantiation
 
-cx_mat conv_cube_2_mat(cx_cube to_be_conv){
+template cx_3d<float> add_cx_3d (cx_3d<float> former, cx_3d<float>);
+template cx_3d<double> add_cx_3d (cx_3d<double> former, cx_3d<double>);
+
+
+template <typename T>
+Mat<std::complex<T>> conv_cube_2_mat(Cube<std::complex<T>> to_be_conv){
   int n_row_cube = to_be_conv.n_rows;
   int n_slice_cube = to_be_conv.n_slices;
-  cx_mat mat_to_return(n_row_cube,n_slice_cube,fill::zeros);
+  Mat<std::complex<T>> mat_to_return(n_row_cube,n_slice_cube,fill::zeros);
   
   for(size_t i = 0; i < n_row_cube; i++){
-    cx_rowvec temp_row = to_be_conv.tube(i,0);
+    Row<std::complex<T>> temp_row = to_be_conv.tube(i,0);
     mat_to_return.row(i) = temp_row;
   }
   return(mat_to_return);
 }
 
+// Explicit Instantiation
 
+template Mat<std::complex<float>> conv_cube_2_mat(Cube<std::complex<float>>);
+template Mat<std::complex<double>> conv_cube_2_mat(Cube<std::complex<double>>);
 
 // ------------------------------------------------------------------//
 // --------------vector Magnitude generator fucntion----------------//
 // ----------------------------------------------------------------//
 
-
-double vec_mag(rowvec pos_vector){
-  double dim_vec = pos_vector.n_elem, mag = 0;
-  for(int i=0;i<dim_vec;++i){
+template <typename T>
+T vec_mag(Row<T> pos_vector){
+  T  mag = 0;
+  size_t dim_vec = pos_vector.n_elem;
+  for(size_t i=0;i<dim_vec;++i){
     mag = mag + pow(pos_vector(i),2);
   }
   return(mag);
 }
 
+// Explicit Instatiation
+
+template float vec_mag<float>(Row<float>);// For data type floats
+template double vec_mag<double>(Row<double>); // For Double Precision
 
 // ------------------------------------------------------------------//
 // -----------------Mesh Genrator Cube function---------------------//
 // ----------------------------------------------------------------//
 
 
-
-
-cube grid_cube_generator(rowvec x, rowvec y){
-  int x_axis_size = x.n_elem, y_axis_size = y.n_elem;
-  cube Mesh_cube(y_axis_size,x_axis_size,3,fill::zeros);
-  for(int i = 0;i < y_axis_size; ++i){
-    for(int j = 0; j < x_axis_size; ++j){
-      Mesh_cube(i,j,0) = x[j];
-      Mesh_cube(i,j,1) = y[i];
-    }
-  }
-  return(Mesh_cube);
-}
-
-mat grid_target_generator(rowvec x, rowvec y){
-  int x_axis_size = x.n_elem, y_axis_size = y.n_elem;
-  mat Mesh_cube(y_axis_size * x_axis_size,3,fill::zeros);
+template <typename T>
+Mat<T> grid_target_generator(Row<T> x, Row<T> y){
+  size_t x_axis_size = x.n_elem, y_axis_size = y.n_elem;
+  Mat<T> Mesh_cube(y_axis_size * x_axis_size,3,fill::zeros);
   for(int i = 0;i < x_axis_size ; ++i){
     for (int j = 0; j < y_axis_size ; ++j) {
       Mesh_cube(i*y_axis_size+j,0) = x[i];
@@ -76,6 +80,10 @@ mat grid_target_generator(rowvec x, rowvec y){
   return(Mesh_cube);
 }
 
+// Explicit Instantiation
+
+template Mat<float> grid_target_generator(Row<float>, Row<float>);
+template Mat<double> grid_target_generator(Row<double>, Row<double>);
 
 
 // ------------------------------------------------------------------//
@@ -85,62 +93,68 @@ mat grid_target_generator(rowvec x, rowvec y){
 
 
 // Line Maker Funcion
-
-mat line_generator(rowvec start, rowvec end , int no_divisions = 20){
-  rowvec pos_vector = end - start;
-  double mag_of_vec = vec_mag(pos_vector);
-  rowvec unit_pos_vec = pos_vector/mag_of_vec;
-  double d_x = mag_of_vec/no_divisions;
+template<typename T>
+Mat<T> line_generator(Row<T> start, Row<T> end , size_t no_divisions){
+  Row<T> pos_vector = end - start;
+  T mag_of_vec = vec_mag<T>(pos_vector);
+  Row<T> unit_pos_vec = pos_vector/mag_of_vec;
+  T d_x = mag_of_vec/no_divisions;
   
-  mat generated_cords(no_divisions+1,3,fill::zeros);
-  for(int i = 0; i <= no_divisions; ++i){
+  Mat<T> generated_cords(no_divisions+1,3,fill::zeros);
+  for(size_t i = 0; i <= no_divisions; ++i){
     generated_cords.row(i) = start + i * d_x  * unit_pos_vec;
   }
-
   return(generated_cords);
 }
 
 
+// Explicit Instantiation
+
+template Mat<float> line_generator<float>(Row<float>, Row<float>,size_t );
+template Mat<double> line_generator<double>(Row<double>, Row<double>,size_t);
+
+
+
 // Circle maker Fucntion
 
-std::tuple<mat,mat> circle_maker(double d_r,double radii, vec origin_circ , rowvec normal){
 
-  rowvec n = normal/norm(normal);
-  rowvec y_axis_vector = {0,1,0};
-  rowvec l = cross(normal,y_axis_vector);
+template<typename T>
+std::tuple<Mat<T>,Mat<T>> circle_maker(T d_r,T radii, Col<T> origin_circ , Row<T> normal){
+
+  Row<T> n = normal/norm(normal);
+  Row<T> y_axis_vector = {0,1,0};
+  Row<T> l = cross(normal,y_axis_vector);
   l = l/norm(l);
-  rowvec m = cross(n, l);
+  Row<T> m = cross(n, l);
 
   // Calculating the Rotation matrix
 
-  mat rot;
+  Mat<T> rot;
 
   rot.insert_rows(0,l);
   rot.insert_rows(1,m);
   rot.insert_rows(2,n);
   
-
-  
-  mat pos, norm ;
+  Mat<T> pos, norm ;
   int row_counter_pos = 0;
   int row_counter_norms = 0;
 
-  vec loop_radians = regspace<vec>(d_r,d_r,radii);
+  Col<T> loop_radians = regspace<Col<T>>(d_r,d_r,radii);
 
-  for(int i = 0; i<loop_radians.n_elem;++i){
+  for(size_t i = 0; i<loop_radians.n_elem;++i){
 
-    double a_n = std::ceil(2*M_PI*loop_radians[i]/d_r);
-    vec no_division = regspace<vec>(0,1,a_n-1);
+    T a_n = std::ceil(2*M_PI*loop_radians[i]/d_r);
+    Col<T> no_division = regspace<Col<T>>(0,1,a_n-1);
 
-    for(int j = 0;j < no_division.n_elem ; ++j){
+    for(size_t j = 0;j < no_division.n_elem ; ++j){
 
-      vec dpos = {std::cos(2*M_PI*no_division[j]/a_n),std::sin(2*M_PI*no_division[j]/a_n),0} ;
+      Col<T> dpos = {T(std::cos(2*M_PI*no_division[j]/a_n)),T(std::sin(2*M_PI*no_division[j]/a_n)),0} ;
       dpos = dpos * loop_radians[i];
 
       
-      vec npos = origin_circ +  rot.t() * dpos ;
+      Col<T> npos = origin_circ +  rot.t() * dpos ;
      
-      rowvec npos_rowvec =  conv_to<rowvec>::from(npos);
+      Row<T> npos_rowvec =  conv_to<Row<T>>::from(npos);
       pos.insert_rows(row_counter_pos,npos_rowvec);
       row_counter_pos++;
       norm.insert_rows(row_counter_norms,normal);  // this shit is messes up need to Rethink it
@@ -151,34 +165,56 @@ std::tuple<mat,mat> circle_maker(double d_r,double radii, vec origin_circ , rowv
   return std::make_tuple(pos,norm);
 }
 
+// explicit Instantiation
+
+template
+std::tuple<Mat<float>,Mat<float>> circle_maker(float ,float, Col<float>, Row<float>);
+
+template
+std::tuple<Mat<double>,Mat<double>> circle_maker(double ,double, Col<double>, Row<double>);
 
 
-mat rectangle_generator(rowvec x, rowvec y , rowvec o , double x_div = 1000 , double y_div = 1000){
-  rowvec x_dir_rat = x - o ;
-  rowvec x_dir_cos = x_dir_rat  / vec_mag(x_dir_rat);
-  rowvec y_dir_rat = y - o ;
-  rowvec y_dir_cos = y_dir_rat  / vec_mag(y_dir_rat);
+template <typename T>
+Mat<T> rectangle_generator(Row<T> x, Row<T> y , Row<T> o , T x_div , T y_div){
+  Row<T> x_dir_rat = x - o ;
+  Row<T> x_dir_cos = x_dir_rat  / vec_mag(x_dir_rat);
+  Row<T> y_dir_rat = y - o ;
+  Row<T> y_dir_cos = y_dir_rat  / vec_mag(y_dir_rat);
   
-  mat Mesh_cube(x_div * y_div ,3,fill::zeros);
+  Mat<T> Mesh_cube(x_div * y_div ,3,fill::zeros);
   for(int i = 0;i < y_div; ++i){
-    Mesh_cube(span(i*x_div,(i+1)*x_div-1),span::all) =  line_generator(o + i * y_dir_cos, o + i * y_dir_cos + x_div * x_dir_cos , x_div-1);
+    Mesh_cube(span(i*x_div,(i+1)*x_div-1),span::all) =  line_generator<T>(o + i * y_dir_cos, o + i * y_dir_cos + x_div * x_dir_cos , x_div-1);
 
   }
   return(Mesh_cube);
 }
 
-mat source_point_placer(mat source_location_mat, rowvec normal_location, double radiii){
-  int no_of_sources = (int)source_location_mat.n_rows;
-  mat displaced_sources(no_of_sources,3,fill::zeros);
+// Explicit Instantiation
+
+template Mat<float> rectangle_generator(Row<float> , Row<float> , Row<float> , float x_div, float y_div);
+template Mat<double> rectangle_generator(Row<double> , Row<double> , Row<double> , double x_div, double y_div);
+
+
+// ------------------------------------------------------------------//
+// --------------Source Point_placer--------------------------------//
+// ----------------------------------------------------------------//
+
+template<typename T>
+Mat<T> source_point_placer(Mat<T> source_location_mat, Row<T> normal_location, T radiii){
+  size_t no_of_sources = source_location_mat.n_rows;
+  Mat<T> displaced_sources(no_of_sources,3,fill::zeros);
 #pragma omp parallel for
-  for (int i = 0; i < no_of_sources; ++i) { // openMP is Crying if we compare the double and int in a loop so keep that in mind
+  for (size_t i = 0; i < no_of_sources; ++i) { // openMP is Crying if we compare the double and int in a loop so keep that in mind
    displaced_sources.row(i) = source_location_mat.row(i) - radiii * normal_location;
   }
   
   return(displaced_sources);
 }
 
+// Explicit Instantiation
 
+template Mat<float> source_point_placer(Mat<float>, Row<float> , float);
+template Mat<double> source_point_placer(Mat<double>, Row<double> , double);
 
 
 // ------------------------------------------------------------------//
