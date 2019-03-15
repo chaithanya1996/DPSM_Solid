@@ -43,17 +43,16 @@ template double kron_delta(int,int);
 template <typename T>
 Row<complex<T>> G_ij(int i_sub, int j_sub, Row<T> affect_point , Row<T> source_point,T k_s, T k_p ,T rho, T omega){
   Row<T> pos_vector  = source_point - affect_point ;
-  T radius_mag = sqrt(pow(pos_vector(0),2)+pow(pos_vector(1),2)+pow(pos_vector(2),2));
+  T radius_mag = T(sqrt(pow(pos_vector(0),2)+pow(pos_vector(1),2)+pow(pos_vector(2),2)));
   
   // Defining The Required parameters
   
-  std::complex<T> img_start (0,1.0);
-  std::complex<T> e_p = exp(img_start * k_p * radius_mag)/radius_mag; 
-  std::complex<T> e_s = exp(img_start * k_s * radius_mag)/radius_mag;
-  std::complex<T> r_p = img_start * k_p / radius_mag - 1/pow(radius_mag,2);
-  std::complex<T> r_s = img_start * k_s / radius_mag - 1/pow(radius_mag,2);
+  complex<T> img_start(0,1.0);
+  complex<T> e_p = exp(img_start * k_p * radius_mag)/radius_mag; 
+  complex<T> e_s = exp(img_start * k_s * radius_mag)/radius_mag;
+  complex<T> r_p = img_start * k_p / radius_mag - 1/T(pow(radius_mag,2));
+  complex<T> r_s = img_start * k_s / radius_mag - 1/T(pow(radius_mag,2));
 
-  
   Row<T> R_vec(3,fill::zeros);
   for(size_t i = 0;i<3;++i){
     R_vec(i)= affect_point(i) - source_point(i);
@@ -63,8 +62,8 @@ Row<complex<T>> G_ij(int i_sub, int j_sub, Row<T> affect_point , Row<T> source_p
 
   Row<complex<T>> G_point(2,fill::zeros);
   
-  G_point(0) = e_p *( pow(k_p,2) * R_vec(i_sub-1) *  R_vec(j_sub-1) + ( T (3) * R_vec(i_sub-1) *  R_vec(j_sub-1) -  kron_delta<T>(i_sub,j_sub) ) * r_p) / ( 4 * M_PI *  rho * pow(omega,2));
-  G_point(1) = e_s *( pow(k_s,2) * ( kron_delta<T>(i_sub,j_sub) -  R_vec(i_sub-1) *  R_vec(j_sub-1) ) - ( T (3) * R_vec(i_sub-1) *  R_vec(j_sub-1) -  kron_delta<T>(i_sub,j_sub) ) * r_s)/ ( 4 * M_PI *  rho * pow(omega,2));
+  G_point(0) = e_p *( T(pow(k_p,2)) * R_vec(i_sub-1) *  R_vec(j_sub-1) + ( T (3) * R_vec(i_sub-1) *  R_vec(j_sub-1) -  kron_delta<T>(i_sub,j_sub) ) * r_p) / T( 4 * M_PI *  rho * pow(omega,2));
+  G_point(1) = e_s *( T(pow(k_s,2)) * ( kron_delta<T>(i_sub,j_sub) -  R_vec(i_sub-1) *  R_vec(j_sub-1) ) - ( T (3) * R_vec(i_sub-1) *  R_vec(j_sub-1) -  kron_delta<T>(i_sub,j_sub) ) * r_s)/ T( 4 * M_PI *  rho * pow(omega,2));
 
   return(G_point);
 }
@@ -73,7 +72,6 @@ Row<complex<T>> G_ij(int i_sub, int j_sub, Row<T> affect_point , Row<T> source_p
 // Explicit Instantiation
 
 template Row<complex<float>> G_ij(int,int,Row<float>,Row<float>,float,float,float,float);
-
 template Row<complex<double>> G_ij(int,int,Row<double>,Row<double>,double,double,double,double);
 
 // ------------------------------------------------------------------//
@@ -87,7 +85,7 @@ Cube<complex<T>> G_ps_mat_for_point(Row<T> affect_point, Row<T> source_point,T k
   Cube<complex<T>> G_ps_matrix(3,3,2,fill::zeros);
   for(size_t i=0;i<3;++i){
     for(size_t j=0;j<3;++j){
-      G_ps_matrix.tube(i,j) = G_ij(i+1,j+1,affect_point,source_point,k_s ,k_p,rho,omega);
+      G_ps_matrix.tube(i,j) = G_ij<T>(i+1,j+1,affect_point,source_point,k_s ,k_p,rho,omega);
     }
   }
   return(G_ps_matrix);
@@ -108,7 +106,7 @@ Mat<complex<T>> G_mat_for_point(Row<T> affect_point , Row<T> source_point,T k_s 
   Mat<complex<T>> G_ps_matrix(3,3,fill::zeros);
   for(int i=0;i<3;++i){
     for(int j=0;j<3;++j){
-      Row<complex<T>> place_h = G_ij(i+1,j+1,affect_point,source_point,k_s ,k_p,rho,omega);
+      Row<complex<T>> place_h = G_ij<T>(i+1,j+1,affect_point,source_point,k_s ,k_p,rho,omega);
       G_ps_matrix(i,j) = place_h(0) + place_h(1);
     }
   }
@@ -125,7 +123,7 @@ template Mat<complex<double>> G_mat_for_point(Row<double>, Row<double>,double,do
 template <typename T>
 cx_3d<T> G_gen(Row<T> source_point_vector,Mat<T> target_point ,T k_s ,T k_p,T rho ,T omega){ 
   int tar_vec_len = target_point.n_rows;
-  cx_3d<T> G_vec_source(tar_vec_len,cx_mat(3,3));
+  cx_3d<T> G_vec_source(tar_vec_len,Mat<complex<T>>(3,3));
   for(int i =0;i<tar_vec_len;++i){
     G_vec_source[i] = G_mat_for_point<T>(target_point.row(i),source_point_vector,k_s,k_p,rho,omega);
   }
@@ -146,7 +144,8 @@ template<typename T>
 cx_4d_mat<T> G_4d_full(Mat<T> source_point_mat, Mat<T> target_point_mat,T k_s , T k_p,T rho , T omega){
   int no_of_source_point = source_point_mat.n_rows;
   int no_of_target_point = target_point_mat.n_rows;
-  cx_4d_mat<T> G_for_all_source_and_target(no_of_source_point,cx_3d(no_of_target_point,cx_mat(3,3,fill::zeros)));
+  cx_3d<T> Dummy_cx_3d(no_of_target_point,Mat<complex<T>>(3,3,fill::zeros));
+  cx_4d_mat<T> G_for_all_source_and_target(no_of_source_point,Dummy_cx_3d);
   for (int i = 0; i < G_for_all_source_and_target.size(); ++i) {
     G_for_all_source_and_target[i] = G_gen<T>(source_point_mat.row(i),target_point_mat ,k_s , k_p,rho ,omega);
   }
@@ -154,7 +153,6 @@ cx_4d_mat<T> G_4d_full(Mat<T> source_point_mat, Mat<T> target_point_mat,T k_s , 
 }
 
 template cx_4d_mat<float> G_4d_full(Mat<float>, Mat<float>,float, float,float , float);
-
 template cx_4d_mat<double> G_4d_full(Mat<double>, Mat<double>,double, double,double , double);
 
 // ------------------------------------------------------------------//
@@ -163,7 +161,7 @@ template cx_4d_mat<double> G_4d_full(Mat<double>, Mat<double>,double, double,dou
 template <typename T>
 complex<T> r_diff(T radius_mag,T k,T R_val){
   complex<T> img_start(0,1.0);
-  complex<T> value_of_differential = 2 * R_val / pow(radius_mag,3) - img_start * k * R_val /  pow(radius_mag,2);
+  complex<T> value_of_differential = 2 * R_val / T(pow(radius_mag,3)) - img_start * k * R_val / T( pow(radius_mag,2));
   return(value_of_differential);
 }
 
@@ -299,14 +297,16 @@ T G_ijk_helper(Row<T> ijk_thing){
   }
 }
 
-template T G_ijk_helper(Row<T> ijk_thing);
-template T G_ijk_helper(Row<T> ijk_thing);
+template T G_ijk_helper(Row<T>);
+template T G_ijk_helper(Row<T>);
   
 
 
-cx_double G_p_ijk (rowvec ijk_row_passed, rowvec affect_point, rowvec source_point,double k_s , double k_p,double rho , double omega){
 
-  cx_mat R_differ_mat = r_diff_mat_gen(affect_point , source_point, k_s , k_p);
+template <typename T> 
+complex<T> G_p_ijk (Row<T> ijk_row_passed, Row<T> affect_point, Row<T> source_point,T k_s , T k_p,T rho , T omega){
+
+  Mat<complex<T>> R_differ_mat = r_diff_mat_gen<T>(affect_point , source_point, k_s , k_p);
   
   // Now we are going to generate matrix in the same way formuals written in book
   // P - 1st column | S - Second Column
@@ -314,58 +314,59 @@ cx_double G_p_ijk (rowvec ijk_row_passed, rowvec affect_point, rowvec source_poi
      
   // Repetitive openations of calculations
   
-  rowvec pos_vector  = source_point - affect_point ;
-  double radius_mag = pow(pos_vector(0),2)+pow(pos_vector(1),2)+pow(pos_vector(2),2);
+  Row<T> pos_vector  = source_point - affect_point ;
+  T radius_mag = pow(pos_vector(0),2)+pow(pos_vector(1),2)+pow(pos_vector(2),2);
   
   // Defining The Required parameters
   
-  std::complex<double> img_start (0,1.0);
-  std::complex<double> e_p = exp(img_start * k_p * radius_mag)/radius_mag; 
-  std::complex<double> e_s = exp(img_start * k_s * radius_mag)/radius_mag;
-  std::complex<double> r_p = img_start * k_p / radius_mag - 1/pow(radius_mag,2);
-  std::complex<double> r_s = img_start * k_s / radius_mag - 1/pow(radius_mag,2);
-  rowvec R_vec(3,fill::zeros);
+  complex<T> img_start (0,1.0);
+  complex<T> e_p = exp(img_start * k_p * radius_mag)/radius_mag; 
+  complex<T> e_s = exp(img_start * k_s * radius_mag)/radius_mag;
+  complex<T> r_p = img_start * k_p / radius_mag - 1/T(pow(radius_mag,2));
+  complex<T> r_s = img_start * k_s / radius_mag - 1/T(pow(radius_mag,2));
+  Row<T> R_vec(3,fill::zeros);
   
-  for(int i = 0;i<3;++i){
+  for(size_t i = 0;i<3;++i){
     R_vec(i)= affect_point(i) - source_point(i);
   }
-  rowvec ijk_row =  ijk_row_passed + 1; // For compatibility with the Lower level implementations in the Helper functions 
+  Row<T> ijk_row =  ijk_row_passed + 1; // For compatibility with the Lower level implementations in the Helper functions 
 
   // cx_mat G_p_s_matrix = G_ps_mat_for_point(affect_point,source_point,k_s , k_p);
   //std::cout << "iam here" << endl;  
-  cx_rowvec G_place_holder =  G_ij(ijk_row[0],ijk_row[1],affect_point,source_point,k_s ,k_p,rho ,omega) ;
+  Row<complex<T>> G_place_holder =  G_ij(ijk_row[0],ijk_row[1],affect_point,source_point,k_s ,k_p,rho ,omega) ;
   
   ijk_row =  ijk_row_passed ;
-  cx_double Gpiidi  = e_p * ( pow(k_p,2) *  eo_d_universal(ijk_row,R_vec,radius_mag) +  ( G_ijk_helper(ijk_row) +3 * R_vec[ijk_row[0]] * R_vec[ijk_row[1]]) * R_differ_mat(ijk_row[2],0) +  r_p * double (3) * eo_d_universal(ijk_row,R_vec,radius_mag)) / ( 4 * M_PI *  rho * pow(omega,2)) + G_place_holder[0] * (img_start * R_vec[ijk_row[2]] * e_p - R_vec[ijk_row[2]] * e_p / radius_mag);			 
+  complex<T> Gpiidi  = e_p * ( pow(k_p,2) *  eo_d_universal(ijk_row,R_vec,radius_mag) +  ( G_ijk_helper(ijk_row) +3 * R_vec[ijk_row[0]] * R_vec[ijk_row[1]]) * R_differ_mat(ijk_row[2],0) +  r_p * T (3) * eo_d_universal(ijk_row,R_vec,radius_mag)) / ( 4 * M_PI *  rho * pow(omega,2)) + G_place_holder[0] * (img_start * R_vec[ijk_row[2]] * e_p - R_vec[ijk_row[2]] * e_p / radius_mag);			 
 
-  cx_double Gsiidi  = e_s * ( -pow(k_s,2) *  eo_d_universal(ijk_row,R_vec,radius_mag) -  ( G_ijk_helper(ijk_row) +3 * R_vec[ijk_row[0]] * R_vec[ijk_row[1]]) * R_differ_mat(ijk_row[2],0) +  r_s * double (3) * eo_d_universal(ijk_row,R_vec,radius_mag)) / ( 4 * M_PI *  rho * pow(omega,2))+ G_place_holder[1] * (img_start * R_vec[ijk_row[2]] * e_s - R_vec[ijk_row[2]] * e_s / radius_mag);			 
+  complex<T> Gsiidi  = e_s * ( -pow(k_s,2) *  eo_d_universal(ijk_row,R_vec,radius_mag) -  ( G_ijk_helper(ijk_row) +3 * R_vec[ijk_row[0]] * R_vec[ijk_row[1]]) * R_differ_mat(ijk_row[2],0) +  r_s * T (3) * eo_d_universal(ijk_row,R_vec,radius_mag)) / ( 4 * M_PI *  rho * pow(omega,2))+ G_place_holder[1] * (img_start * R_vec[ijk_row[2]] * e_s - R_vec[ijk_row[2]] * e_s / radius_mag);			 
   
   return Gpiidi + Gsiidi ;
 }
 
-
+template complex<float> G_p_ijk (Row<float>, Row<float>, Row<float>,float, float,float, float);
+template complex<double> G_p_ijk (Row<double>, Row<double>, Row<double>,double, double,double, double);
 
 
 // ------------------------------------------------------------------//
 // ---------------G_ijk Matrix Computation--------------------------//
 // ----------------------------------------------------------------//
 
-
-cx_4d G_p_diff_ijk(rowvec source_point_vector,mat observing_plane_cube,double k_s , double k_p,double rho , double omega){
+template <typename T>
+cx_4d<T> G_p_diff_ijk(Row<T> source_point_vector,Mat<T> observing_plane_cube,T k_s , T k_p,T rho , T omega){
   int obs_pln_rows = observing_plane_cube.n_rows;
   
-  cx_4d G_diff_4dcube(obs_pln_rows,cx_cube(3,3,3,fill::zeros));
+  cx_4d<T> G_diff_4dcube(obs_pln_rows,cx_cube(3,3,3,fill::zeros));
 
   for (int i = 0; i < observing_plane_cube.n_rows; ++i){
       // For Generating the Differential matrices
-      for (double k = 0; k < 3; ++k){
-        for (double l = 0; l < 3; ++l){
-          for (double m = 0; m < 3; ++m){
+      for (int k = 0; k < 3; ++k){
+        for (int l = 0; l < 3; ++l){
+          for (int m = 0; m < 3; ++m){
             //std::cout << "----------degbug begin--------------" << endl ;
             //std::cout << "i,j" << i << j << endl ;
-            rowvec ijk_row_gen_vector = {k,l,m};
+            Row<T> ijk_row_gen_vector = {T(k),T(l),T(m)}; // Type Conversion into Appropiate Type for Templating the Operation
             //std::cout << "k,l,m" << ijk_row_gen_vector << endl ;
-            cx_double G_p_i_k_point_value = G_p_ijk(ijk_row_gen_vector,source_point_vector,observing_plane_cube.row(i),k_s,k_p,rho ,omega);
+            complex<T> G_p_i_k_point_value = G_p_ijk<T>(ijk_row_gen_vector,source_point_vector,observing_plane_cube.row(i),k_s,k_p,rho ,omega);
             //std::cout << " G_value "<< G_p_i_k_point_value << endl ;
             G_diff_4dcube[i](k,l,m) =   G_p_i_k_point_value;
             //std::cout << "----------degbug end--------------" << endl ;
@@ -378,27 +379,40 @@ cx_4d G_p_diff_ijk(rowvec source_point_vector,mat observing_plane_cube,double k_
   return G_diff_4dcube;
 }
 
-cx_5d G_ijk_full_matrix(mat source_point_mat,mat target_point_mat,double k_s , double k_p,double rho , double omega){
- double no_of_source_point = source_point_mat.n_rows;
- double no_of_target_point = target_point_mat.n_rows;
- cx_5d  G_for_all_source_and_target(no_of_source_point,cx_4d(no_of_target_point,cx_cube(3,3,3,fill::zeros)));
+template cx_4d<float> G_p_diff_ijk(Row<float>,Mat<float>,float,float,float, float);
+
+template cx_4d<double> G_p_diff_ijk(Row<double>,Mat<double>,double,double,double, double);
+
+
+template <typename T>
+cx_5d<T> G_ijk_full_matrix(Mat<T> source_point_mat,Mat<T> target_point_mat,T k_s , T k_p,T rho ,T omega){
+ int no_of_source_point = source_point_mat.n_rows;
+ int no_of_target_point = target_point_mat.n_rows;
+ cx_5d<T>  G_for_all_source_and_target(no_of_source_point,cx_4d(no_of_target_point,cx_cube(3,3,3,fill::zeros)));
  #pragma omp parallel for
   for (int i = 0; i < G_for_all_source_and_target.size(); ++i) {
-    G_for_all_source_and_target[i] = G_p_diff_ijk(source_point_mat.row(i),target_point_mat ,k_s , k_p,rho ,omega);
+    G_for_all_source_and_target[i] = G_p_diff_ijk<T>(source_point_mat.row(i),target_point_mat ,k_s , k_p,rho ,omega);
   }
   return(G_for_all_source_and_target);  
 }
 
+template cx_5d<float> G_ijk_full_matrix(Mat<float>,Mat<float>,float,float,float,float);
+
+template cx_5d<double> G_ijk_full_matrix(Mat<double>,Mat<double>,double,double,double,double);
+  
 // ------------------------------------------------------------------//
 // -----------------Strain Calculation Procedur---------------------//
 // ----------------------------------------------------------------//
 
-cx_3d strain_cal_for_one_source(cx_4d G_ijk_cube, cx_rowvec strength_cube){
 
-  cx_colvec strength_cube_col = strength_cube.t();
+// Strain Calculation for Onesource For Entire Observation Target
+template <typename T>
+cx_3d<T> strain_cal_for_one_source(cx_4d<T> G_ijk_cube, Row<complex<T>> strength_cube){
+
+  Col<complex<T>> strength_cube_col = strength_cube.t();
   int n_row_cube = G_ijk_cube.size();
 
-  cx_3d obs_plane_stress_comp(n_row_cube,cx_mat(3,3,fill::zeros));
+  cx_3d<T> obs_plane_stress_comp(n_row_cube,cx_mat(3,3,fill::zeros));
   
   /*
   for(size_t i = 0; i < n_row_cube; i++){
@@ -408,8 +422,8 @@ cx_3d strain_cal_for_one_source(cx_4d G_ijk_cube, cx_rowvec strength_cube){
   
   for(size_t i = 0; i < n_row_cube; i++){
     for(size_t k = 0; k < 3; k++){
-      cx_cube mat_to_operate = G_ijk_cube[i].subcube( 0, k, 0, 2, k, 2 );
-      cx_mat converted_cub_tomat = conv_cube_2_mat(mat_to_operate);
+      Cube<T> mat_to_operate = G_ijk_cube[i].subcube( 0, k, 0, 2, k, 2 );
+      Mat<complex<T>> converted_cub_tomat = conv_cube_2_mat(mat_to_operate);
       //  obs_plane_stress_comp[i][j].col(k)= (converted_cub_tomat  + converted_cub_tomat.t()) * strength_cube_col ;
       obs_plane_stress_comp[i]= obs_plane_stress_comp[i] + (converted_cub_tomat  + converted_cub_tomat.t()) * strength_cube_col(k) ;
     }
@@ -417,33 +431,43 @@ cx_3d strain_cal_for_one_source(cx_4d G_ijk_cube, cx_rowvec strength_cube){
   return(obs_plane_stress_comp);
 }
 
-cx_3d strain_cal(cx_5d G_ijk_source,cx_mat src_str){
-  double target_size = G_ijk_source.size();
-  cx_3d strains_on_plane(target_size,cx_mat(3,3,fill::zeros));
+template cx_3d<double> strain_cal_for_one_source(cx_4d<double>, Row<complex<double>>);
+template cx_3d<float> strain_cal_for_one_source(cx_4d<float>, Row<complex<float>>);
+
+template <typename T>
+cx_3d<T> strain_cal(cx_5d<T> G_ijk_source,Mat<complex<T>> src_str){
+  int target_size = G_ijk_source.size();
+  cx_3d<T> strains_on_plane(target_size,cx_mat(3,3,fill::zeros));
   #pragma omp parallel for
   for(size_t i = 0; i < src_str.n_cols; i++){
-    strains_on_plane = add_cx_3d(strains_on_plane,strain_cal_for_one_source(G_ijk_source[i],src_str.row(i)));
+    strains_on_plane = add_cx_3d<T>(strains_on_plane,strain_cal_for_one_source<T>(G_ijk_source[i],src_str.row(i)));
   }
   return(strains_on_plane);
 }
 
+template cx_3d<float> strain_cal(cx_5d<float>,Mat<complex<float>> );
+template cx_3d<double> strain_cal(cx_5d<double>,Mat<complex<double>> );
 
 // ------------------------------------------------------------------//
 // -----------------Stress Calculation Procedure---------------------//
 // ----------------------------------------------------------------//
-
-cx_cube transpose_cube_in_dir_2(cx_cube cube_to_trans){
-  cx_cube return_cx_cube;
+template<typename T>
+Cube<T> transpose_cube_in_dir_2(Cube<T> cube_to_trans){
+  Cube<T> return_cx_cube;
   for (int i=0; i < 0; ++i) {
     return_cx_cube.slice(i) = cube_to_trans.slice(i).t();
   }
   return(return_cx_cube);
 }
 
+template Cube<double> transpose_cube_in_dir_2(Cube<double>);
+template Cube<float> transpose_cube_in_dir_2(Cube<float>);
 
-cx_cube stress_coff_point(cx_cube G_ijk,double lamda,double mu){
 
-  cx_cube Stress_coff(3,3,3,fill::zeros);
+template <typename T>
+Cube<T> stress_coff_point(Cube<T> G_ijk,T lamda,T mu){
+
+  Cube<T> Stress_coff(3,3,3,fill::zeros);
 
   Stress_coff(0,0,0) = (2*mu+lamda)* G_ijk(0,0,0) + lamda * ( G_ijk(1,0,1) + G_ijk(2,0,2)) ;
   Stress_coff(0,0,1) = (2*mu+lamda)* G_ijk(0,1,0) + lamda * ( G_ijk(1,1,1) + G_ijk(2,1,2)) ;
@@ -488,10 +512,15 @@ cx_cube stress_coff_point(cx_cube G_ijk,double lamda,double mu){
   return(Stress_coff);
 }
 
-cx_5d stress_coff_calc(const cx_5d& G_ijk_source,double lamda,double mu){
-  double size_1 = G_ijk_source.size();
-  double size_2 = G_ijk_source[0].size();
-  cx_5d Converterd_stress_coff(size_1,cx_4d(size_2,cx_cube(3,3,3,fill::zeros)));
+template Cube<float> stress_coff_point(Cube<float>,float,float);
+template Cube<double> stress_coff_point(Cube<double>,double,double);
+
+
+template <typename T>
+cx_5d<T> stress_coff_calc(const cx_5d<T>& G_ijk_source,T lamda,T mu){
+  int size_1 = G_ijk_source.size();
+  int size_2 = G_ijk_source[0].size();
+  cx_5d<T> Converterd_stress_coff(size_1,cx_4d<T>(size_2,Cube<complex<T>>(3,3,3,fill::zeros)));
   
   for (int i = 0; i < size_1; ++i) {
     for (int j = 0; j < size_2; ++j) {
@@ -501,31 +530,38 @@ cx_5d stress_coff_calc(const cx_5d& G_ijk_source,double lamda,double mu){
   return(Converterd_stress_coff);
 }
 
+template cx_5d<double> stress_coff_calc(const cx_5d<double>&,double,double);
+template cx_5d<float> stress_coff_calc(const cx_5d<float>&,float,float);
 
-cx_3d stress_cal_one_source(cx_4d G_ijk_cube, cx_rowvec strength_cube){
 
-  cx_colvec strength_cube_col = strength_cube.t();
+
+template <typename T>
+cx_3d<T> stress_cal_one_source(cx_4d<T> G_ijk_cube, Row<complex<T>> strength_cube){
+
+  Col<complex<T>> strength_cube_col = strength_cube.t();
   int n_row_cube = G_ijk_cube.size();
 
-  cx_3d obs_plane_stress_comp(n_row_cube,cx_mat(3,3,fill::zeros));
-  
+  cx_3d<T> obs_plane_stress_comp(n_row_cube,cx_mat(3,3,fill::zeros));
   
   for(size_t i = 0; i < n_row_cube; i++){
     for(size_t k = 0; k < 3; k++){
-      cx_cube mat_to_operate = G_ijk_cube[i].subcube( 0, k, 0, 2, k, 2 );
-      cx_mat converted_cub_tomat = conv_cube_2_mat(mat_to_operate);
+      Cube<complex<T>> mat_to_operate = G_ijk_cube[i].subcube( 0, k, 0, 2, k, 2 );
+      Mat<complex<T>> converted_cub_tomat = conv_cube_2_mat(mat_to_operate);
       obs_plane_stress_comp[i]= obs_plane_stress_comp[i] + (converted_cub_tomat) * strength_cube_col(k) ;
     }
   }
   return(obs_plane_stress_comp);
 }
 
+template cx_3d<float> stress_cal_one_source(cx_4d<float> G_ijk_cube, Row<complex<float>>);
+template cx_3d<double> stress_cal_one_source(cx_4d<double> G_ijk_cube, Row<complex<double>>);
 
 
-cx_3d stress_cal(const cx_5d &G_ijk_source,cx_mat src_str,double lamda,double mu){ // the G_ijk_must be Converted Soueces here
+template <typename T>
+cx_3d<T> stress_cal(const cx_5d<T> &G_ijk_source,Mat<complex<T>> src_str,T lamda,T mu){ // the G_ijk_must be Converted Soueces here
 
-  double target_size = G_ijk_source[0].size(); // Thought as Correct 
-  cx_3d stress_on_plane(target_size,cx_mat(3,3,fill::zeros));
+  int target_size = G_ijk_source[0].size(); // Thought as Correct 
+  cx_3d<T> stress_on_plane(target_size,cx_mat(3,3,fill::zeros));
   
   // MultiThreading the Calculations Using OPenMP
   #pragma omp parallel for
@@ -535,18 +571,25 @@ cx_3d stress_cal(const cx_5d &G_ijk_source,cx_mat src_str,double lamda,double mu
   return(stress_on_plane);
 }
 
+template cx_3d<double> stress_cal(const cx_5d<double>&,Mat<complex<double>,double,double);
+template cx_3d<float> stress_cal(const cx_5d<float>&,Mat<complex<float>,float,float);
+
+
 
 // The Entire Fucntion is Redundant Waste Memory And thereof Needed Care ful Restructuing of Code To Avoid Memory Problem in Furture
 // This Paticular Function is used with constat Pointer Reference to Minimize the Memory usage Peak During the Computation
-cx_3d stress_from_points(mat source_points, cx_mat src_str, mat target_points,double k_s , double k_p,double rho , double omega , double lamda,double mu){
-  cx_5d G_vals_for_given = G_ijk_full_matrix(source_points,target_points,k_s ,k_p,rho , omega); 
-  cx_5d stress_for_given  =  stress_coff_calc(G_vals_for_given,lamda, mu); // Pass by Reference
-  cx_3d str_vals = stress_cal(stress_for_given,src_str,lamda,mu); // Pass By Reference 
+template <typename T>
+cx_3d<T> stress_from_points(Mat<T> source_points, Mat<complex<T>> src_str, Mat<T> target_points,T k_s , T k_p,T rho ,T omega , T lamda,T mu){
+  cx_5d<T> G_vals_for_given = G_ijk_full_matrix(source_points,target_points,k_s ,k_p,rho , omega); 
+  cx_5d<T> stress_for_given  =  stress_coff_calc(G_vals_for_given,lamda, mu); // Pass by Reference
+  cx_3d<T> str_vals = stress_cal(stress_for_given,src_str,lamda,mu); // Pass By Reference 
   return(str_vals);
 }
 
-/* Redundant in Occasion of Convering all observing plane to Vectors 
+template cx_3d<float> stress_from_points(Mat<float>,Mat<complex<float>>,Mat<float>,float,float,float,float,float,float);
+template cx_3d<double> stress_from_points(Mat<double>,Mat<complex<double>>,Mat<double>,double,double,double,double,double,double);
 
+/* Redundant in Occasion of Convering all observing plane to Vectors 
 
 std::vector<cx_double> conv_observing_plane_mat_to_vector(cx_mat Observing_plane){
   int no_of_rows = Observing_plane.n_rows;
@@ -592,20 +635,20 @@ std::vector<cx_double> conv_observing_plane_mat_to_vector(cx_mat Observing_plane
 // ----------------------------------------------------------------//
 
 
-
-cx_colvec source_strength_derivation(cx_5d G_ijk_cube_of_sources,cx_3d stress_matrix){
+template <typename T>
+Col<complex<T>> source_strength_derivation(cx_5d<T> G_ijk_cube_of_sources,cx_3d<T> stress_matrix){
   
   int sources_len = stress_matrix.size();
   cout << " Source Lenngth -" << sources_len << endl;
   // cx_mat str_mat(sources_len*stress_matrix[0].n_rows,stress_matrix[0].n_cols,fill::zeros);
-  cx_colvec str_mat(sources_len * stress_matrix[0].n_elem);
+  Col<complex<T>> str_mat(sources_len * stress_matrix[0].n_elem);
 
   
   int source_no = G_ijk_cube_of_sources.size() ;
   int target_no =  G_ijk_cube_of_sources[0].size();
 
   
-  cx_cube G_full(target_no * 3,sources_len * 3,3,fill::zeros);
+  Cube<complex<T>> G_full(target_no * 3,sources_len * 3,3,fill::zeros);
 
   //std::cout << "Creating G_full" << endl;
   // std::cout << G_full << endl;
@@ -632,12 +675,12 @@ cx_colvec source_strength_derivation(cx_5d G_ijk_cube_of_sources,cx_3d stress_ma
   
   // Converting Above Cube tot the matrix
 
-  cx_mat G_full_mat_form(G_full.n_rows * 3,G_full.n_cols,fill::zeros);
+  Mat<complex<T>> G_full_mat_form(G_full.n_rows * 3,G_full.n_cols,fill::zeros);
 
 #pragma omp parallel for
   for(size_t i = 0; i < G_full.n_rows /3; i++){
     for(size_t j =0; j < 3 ; ++j){
-      cx_mat temper = G_full(span(0,2),span(0,G_full.n_cols-1),span(j,j));
+        Mat<complex<T>> temper = G_full(span(0,2),span(0,G_full.n_cols-1),span(j,j));
       //      std::cout << "adjsnfdb" <<i << j << endl ;
       G_full_mat_form(span(i*9+j*3,i*9+j*3+2), span(0,G_full.n_cols-1) ) = temper ;
     }
@@ -645,11 +688,15 @@ cx_colvec source_strength_derivation(cx_5d G_ijk_cube_of_sources,cx_3d stress_ma
 
   //std::cout << G_full_mat_form <<endl;
   cout << " Start_solving " << sources_len << endl;
-  cx_colvec col_one = solve(G_full_mat_form,str_mat);
+  Col<complex<T>> col_one = solve(G_full_mat_form,str_mat);
   cout << " End Solving -" << sources_len << endl;
   return(col_one);
 }
 
+
+template Col<complex<float>> source_strength_derivation(cx_5d<float>,cx_3d<float>);
+template Col<complex<double>> source_strength_derivation(cx_5d<double>,cx_3d<double>);
+  
 // ------------------------------------------------------------------//
 // High Level Function For point Strenght caculation----------------//
 // ----------------------------------------------------------------//
@@ -657,28 +704,27 @@ cx_colvec source_strength_derivation(cx_5d G_ijk_cube_of_sources,cx_3d stress_ma
 
 // Need to Redesign The Hight level function for Hetro geneous and homogeneous material
 
-
-cx_mat get_strength(mat source_point_list,double r_s, rowvec direction_cosine,cx_3d stress_matrix,double k_s,double k_p,double rho , double omega){
+template<typename T>
+Mat<complex<T>> get_strength(Mat<T> source_point_list,T r_s,Row<T> direction_cosine,cx_3d<T> stress_matrix,T k_s,T k_p,T rho , T omega){
   
-  mat target_point(size(source_point_list));
-  
+  Mat<T> target_point(size(source_point_list));
   for(int i = 0 ; i < source_point_list.n_rows;++i){
     target_point.row(i) = source_point_list.row(i) - r_s * direction_cosine;
   }
   
-  double no_of_source_points = source_point_list.n_rows;
-  cx_5d G_matrix_calculations(no_of_source_points,cx_4d(no_of_source_points,cx_cube(3,3,3,fill::zeros)));
+  int no_of_source_points = source_point_list.n_rows;
+  cx_5d<T> G_matrix_calculations(no_of_source_points,cx_4d(no_of_source_points,cx_cube(3,3,3,fill::zeros)));
   
   for(int i = 0; i < no_of_source_points; ++i){
     G_matrix_calculations[i] = G_p_diff_ijk(source_point_list.row(i), target_point,k_s,k_p,rho ,omega);
   }
 
   
-  cx_colvec point_strenghts = source_strength_derivation(G_matrix_calculations,stress_matrix);
+  Col<complex<T>> point_strenghts = source_strength_derivation(G_matrix_calculations,stress_matrix);
   
   
-  double out_mat_rows =  point_strenghts.n_elem/3;
-  cx_mat P_mat_form(out_mat_rows,3,fill::zeros);
+  T out_mat_rows =  point_strenghts.n_elem/3;
+  Mat<complex<T>> P_mat_form(out_mat_rows,3,fill::zeros);
   
   for(int i = 0;i<out_mat_rows;++i){
     for( int j = 0; j < 3 ;++j){
@@ -688,36 +734,41 @@ cx_mat get_strength(mat source_point_list,double r_s, rowvec direction_cosine,cx
   return(P_mat_form);
 }
 
-cx_mat get_strength_hetro(mat source_point_list,mat passive_source_list ,double r_s, rowvec direction_cosine,cx_3d stress_matrix,double k_s,double k_p,double rho , double omega,double mu,double lamda){
+template Mat<complex<float>> get_strength(Mat<float>,float,Row<float>,cx_3d<float>,float,float,float,float);
+template Mat<complex<double>> get_strength(Mat<double>,double,Row<double>,cx_3d<double>,double,double,double,double);
+
+
+template <typename T>
+Mat<complex<T>> get_strength_hetro(Mat<T> source_point_list,Mat<T> passive_source_list ,T r_s, Row<T> direction_cosine,cx_3d<T> stress_matrix,T k_s,T k_p,T rho , T omega,T mu,T lamda){
 
   // incoming Point Locations are Exact Location on which the Sources are placed
   
   int no_of_active_sources = source_point_list.n_rows;
   int no_of_passive_sources = passive_source_list.n_rows;
 
-  cx_mat active_source_str(no_of_active_sources,3,fill::zeros);
-  cx_mat passive_source_str(no_of_passive_sources,3,fill::zeros);
+  Mat<complex<T>> active_source_str(no_of_active_sources,3,fill::zeros);
+  Mat<complex<T>> passive_source_str(no_of_passive_sources,3,fill::zeros);
 
-  mat total_sources = join_cols(source_point_list,passive_source_list);
+  Mat<T> total_sources = join_cols(source_point_list,passive_source_list);
   
-  mat exact_source_point_mat_stress(no_of_active_sources,3);
+  Mat<T> exact_source_point_mat_stress(no_of_active_sources,3);
   cout << "Black Sheep 7" << endl;
 #pragma omp parallel for 
   for (int i = 0; i < no_of_active_sources; ++i) {
     exact_source_point_mat_stress.row(i) = source_point_list.row(i)  + direction_cosine * r_s ;
   }
-    cout << "Black Sheep 8" << endl;
-  cx_5d G_matrix_calculations(total_sources.n_rows,cx_4d(no_of_active_sources ,cx_cube(3,3,3,fill::zeros)));
+  cout << "Black Sheep 8" << endl;
+  cx_5d<T> G_matrix_calculations(total_sources.n_rows,cx_4d(no_of_active_sources ,cx_cube(3,3,3,fill::zeros)));
 #pragma omp parallel for 
   for(int i = 0; i < total_sources.n_rows; ++i){
     //std::cout << i << "\n";
     G_matrix_calculations[i] = G_p_diff_ijk(total_sources.row(i),exact_source_point_mat_stress,k_s,k_p,rho ,omega);
   }
   cout << "Black Sheep 9" << endl;
-  cx_colvec solid_point_strength_colvec = source_strength_derivation(G_matrix_calculations,stress_matrix);
+  Col<complex<T>> solid_point_strength_colvec = source_strength_derivation(G_matrix_calculations,stress_matrix);
   cout << "Black Sheep 10" << endl;
-  double out_mat_rows =  solid_point_strength_colvec.n_elem/3;
-  cx_mat P_mat_form(out_mat_rows,3,fill::zeros);
+  int out_mat_rows =  solid_point_strength_colvec.n_elem/3;
+  Mat<complex<T>> P_mat_form(out_mat_rows,3,fill::zeros);
   
   for(int i = 0;i<out_mat_rows;++i){
     for( int j = 0; j < 3 ;++j){
@@ -728,5 +779,7 @@ cx_mat get_strength_hetro(mat source_point_list,mat passive_source_list ,double 
   return(P_mat_form);
 }
 
-// Initializing The Template Class
 
+// Initializing The Template Class
+template Mat<complex<float>> get_strength_hetro(Mat<float>,Mat<float>,float,Row<float>,cx_3d<float>,float,float,float,float,float,float);
+template Mat<complex<double>> get_strength_hetro(Mat<double>,Mat<double>,double,Row<double>,cx_3d<double>,double,double,double,double,double,double);

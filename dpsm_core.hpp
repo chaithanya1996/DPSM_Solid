@@ -55,21 +55,63 @@ T eoijdi(T i_val ,T j_val,Row<T> R_vector,T r_mag);
 template <typename T>
 T eo_d_universal(Row<T> i_arr,Row<T> R_vec, T r_mag);
 
-
   
 Mat<int> Combination_gen();
-double G_ijk_helper(rowvec ijk_thing);
-cx_double G_p_ijk (rowvec ijk_row_passed, rowvec affect_point, rowvec source_point,double k_s , double k_p,double rho , double omega);
-cx_4d G_p_diff_ijk(rowvec source_point_vector,mat observing_plane_cube,double k_s , double k_p,double rho , double omega);
-cx_5d G_ijk_full_matrix(mat source_point_mat,mat target_point_mat,double k_s , double k_p,double rho , double omega);
-cx_3d strain_cal_for_one_source(cx_4d G_ijk_cube, cx_rowvec strength_cube);
-cx_3d strain_cal(cx_5d G_ijk_source,cx_mat src_str);
-cx_cube transpose_cube_in_dir_2(cx_cube cube_to_trans);
-cx_cube stress_coff_point(cx_cube G_ijk,double lamda,double mu);
-cx_5d stress_coff_calc(const cx_5d& G_ijk_source,double lamda,double mu);
-cx_3d stress_cal_one_source(cx_4d G_ijk_cube, cx_rowvec strength_cube);
-cx_3d stress_cal(const cx_5d &G_ijk_source,cx_mat src_str,double lamda,double mu);
-cx_3d stress_from_points(mat source_points, cx_mat src_str, mat target_points,double k_s , double k_p,double rho , double omega , double lamda,double mu);
-cx_colvec source_strength_derivation(cx_5d G_ijk_cube_of_sources,cx_3d stress_matrix);
-cx_mat get_strength(mat source_point_list,double r_s, rowvec direction_cosine,cx_3d stress_matrix,double k_s,double k_p,double rho , double omega);
-cx_mat get_strength_hetro(mat source_point_list,mat passive_source_list ,double r_s, rowvec direction_cosine,cx_3d stress_matrix,double k_s,double k_p,double rho , double omega,double mu,double lamda);
+
+
+template <typename T>
+T G_ijk_helper(Row<T> ijk_thing);
+
+template <typename T> 
+complex<T> G_p_ijk (Row<T> ijk_row_passed, Row<T> affect_point, Row<T> source_point,T k_s , T k_p,T rho , T omega);
+
+template <typename T>
+cx_4d<T> G_p_diff_ijk(Row<T> source_point_vector,Mat<T> observing_plane_cube,T k_s , T k_p,T rho , T omega);
+
+template <typename T>
+cx_5d<T> G_ijk_full_matrix(Mat<T> source_point_mat,Mat<T> target_point_mat,T k_s , T k_p,T rho ,T omega);
+
+  
+// ------------------------------------------------------------------//
+// -----------------Strain Calculation Procedur---------------------//
+// ----------------------------------------------------------------//
+
+
+template <typename T>
+cx_3d<T> strain_cal_for_one_source(cx_4d<T> G_ijk_cube, Row<complex<T>> strength_cube);
+
+template <typename T>
+cx_3d<T> strain_cal(cx_5d<T> G_ijk_source,Mat<complex<T>> src_str);
+
+// ------------------------------------------------------------------//
+// -----------------Stress Calculation Procedure---------------------//
+// ----------------------------------------------------------------//
+
+template<typename T>
+Cube<T> transpose_cube_in_dir_2(Cube<T> cube_to_trans);
+  
+template <typename T>
+Cube<T> stress_coff_point(Cube<T> G_ijk,T lamda,T mu);
+
+template <typename T>
+cx_5d<T> stress_coff_calc(const cx_5d<T>& G_ijk_source,T lamda,T mu);
+
+template <typename T>
+cx_3d<T> stress_cal_one_source(cx_4d<T> G_ijk_cube, Row<complex<T>> strength_cube);
+
+template <typename T>
+cx_3d<T> stress_cal(const cx_5d<T> &G_ijk_source,Mat<complex<T>> src_str,T lamda,T mu);
+
+
+template <typename T>
+cx_3d<T> stress_from_points(Mat<T> source_points, Mat<complex<T>> src_str, Mat<T> target_points,T k_s , T k_p,T rho ,T omega , T lamda,T mu);
+
+template <typename T>
+Col<complex<T>> source_strength_derivation(cx_5d<T> G_ijk_cube_of_sources,cx_3d<T> stress_matrix);
+
+
+template<typename T>
+Mat<complex<T>> get_strength(Mat<T> source_point_list,T r_s,Row<T> direction_cosine,cx_3d<T> stress_matrix,T k_s,T k_p,T rho , T omega);
+
+template <typename T>
+Mat<complex<T>> get_strength_hetro(Mat<T> source_point_list,Mat<T> passive_source_list ,T r_s, Row<T> direction_cosine,cx_3d<T> stress_matrix,T k_s,T k_p,T rho , T omega,T mu,T lamda);

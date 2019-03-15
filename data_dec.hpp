@@ -5,12 +5,13 @@
 
 #include <cstdlib>
 #include <fstream>
-
+#include <cmath>
 
 
 using namespace arma;
 
-
+using std::sqrt;
+using std::pow;
 using std::cerr;
 using std::cout;
 using std::endl;
