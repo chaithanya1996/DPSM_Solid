@@ -1,26 +1,62 @@
 #include "dpsm_helpers.hpp"
 
-template <typename TYPE>TYPE r_s_calculator(TYPE freq, TYPE c){
-  int safety_factor = 2;
-  TYPE r_s;
-  r_s = c / freq / 2 / M_PI / safety_factor;
-  return(r_s);
-};
+
+template <typename TYPE>TYPE r_s_calculator(TYPE freq, TYPE c);
+
+// Kron Delta _funtion
+
+template<typename T>
+T kron_delta(int i, int j);
+
+// Templated G_ij Basic Calulation
+
+template <typename T>
+Row<complex<T>> G_ij(int i_sub, int j_sub, Row<T> affect_point , Row<T> source_point,T k_s, T k_p ,T rho, T omega);
+
+// Green Function Calculation Source to Target ( One Point - One Point)
+template <typename T>
+Cube<complex<T>> G_ps_mat_for_point(Row<T> affect_point, Row<T> source_point,T k_s , T k_p, T rho , T omega);
+
+// Second Version for facilitate Displacemnt Caclualtuon
+template <typename T>
+Mat<complex<T>> G_mat_for_point(Row<T> affect_point , Row<T> source_point,T k_s ,T k_p,T rho ,T omega);
+
+// Genrate G from Source Point to Entire Target point Matric  
+template <typename T>
+cx_3d<T> G_gen(Row<T> source_point_vector,Mat<T> target_point ,T k_s ,T k_p,T rho ,T omega);
+
+// Complete G_generator For Source To Target
+
+template<typename T>
+cx_4d_mat<T> G_4d_full(Mat<T> source_point_mat, Mat<T> target_point_mat,T k_s , T k_p,T rho , T omega);
+
+// ------------------------------------------------------------------//
+// -----------------G Diff calculation procedures-------------------//
+// ----------------------------------------------------------------//
+
+template <typename T>
+complex<T> r_diff(T radius_mag,T k,T R_val);
+
+template <typename T>
+Mat<T> r_diff_mat_gen(Row<T> affect_point , Row<T> source_point,T k_s , T k_p);
+  
+template <typename T>
+T eoiidi(T i_val ,Row<T> R_vector,T r_mag);
+
+template <typename T>
+T eoijdk(T i_val ,T j_val ,Row<T> R_vector,T r_mag);
+
+template <typename T>
+T eoiidj(T i_val ,T j_val ,Row<T> R_vector,T r_mag);
+
+template <typename T>
+T eoijdi(T i_val ,T j_val,Row<T> R_vector,T r_mag);
+
+template <typename T>
+T eo_d_universal(Row<T> i_arr,Row<T> R_vec, T r_mag);
 
 
-double kron_delta(int i, int j);
-cx_rowvec G_ij(int i_sub, int j_sub, rowvec affect_point , rowvec source_point,double k_s , double k_p ,double rho , double omega);
-cx_cube G_ps_mat_for_point(rowvec affect_point, rowvec source_point,double k_s , double k_p, double rho , double omega);
-cx_mat G_mat_for_point(rowvec affect_point , rowvec source_point,double k_s , double k_p,double rho , double omega);
-cx_3d G_gen(rowvec source_point_vector,mat target_point ,double k_s , double k_p,double rho , double omega);
-cx_4d_mat G_4d_full(mat source_point_mat, mat target_point_mat,double k_s , double k_p,double rho , double omega);
-std::complex<double> r_diff(double radius_mag,double k,double R_val);
-cx_mat r_diff_mat_gen(rowvec affect_point , rowvec source_point,double k_s , double k_p);
-double eoiidi(double i_val ,rowvec R_vector,double r_mag);
-double eoijdk(double i_val ,double j_val ,rowvec R_vector,double r_mag);
-double eoiidj(double i_val ,double j_val ,rowvec R_vector,double r_mag);
-double eoijdi(double i_val ,double j_val,rowvec R_vector,double r_mag);
-double eo_d_universal(rowvec i_arr,rowvec R_vec, double r_mag);
+  
 Mat<int> Combination_gen();
 double G_ijk_helper(rowvec ijk_thing);
 cx_double G_p_ijk (rowvec ijk_row_passed, rowvec affect_point, rowvec source_point,double k_s , double k_p,double rho , double omega);

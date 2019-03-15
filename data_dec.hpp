@@ -16,7 +16,7 @@ using std::cout;
 using std::endl;
 using std::size_t;
 using std::ofstream;
-
+using std::complex;
 typedef std::complex<double> cx_db; // Redundant Stuff
 
 // Implemting Templated Alias Type Def Varibles 

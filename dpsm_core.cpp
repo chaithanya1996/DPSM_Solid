@@ -1,191 +1,274 @@
 #include "dpsm_core.hpp"
 
 
+template <typename TYPE>
+TYPE r_s_calculator(TYPE freq, TYPE c){
+  int safety_factor = 2;
+  TYPE r_s;
+  r_s = c / freq / 2 / M_PI / safety_factor;
+  return(r_s);
+};
+
+// Explicit Instantiation
+
+template float r_s_calculator(float,float);
+template double r_s_calculator(double,double);
+
 // ------------------------------------------------------------------//
 // ---------------Green generator Catergory-------------------------//
 // ----------------------------------------------------------------//
 
 
-double kron_delta(int i, int j){
+// Kron Delta _funtion
+
+template<typename T>
+T kron_delta(int i, int j){
   if(i == j){
-    return(double (1));
+    return(T (1));
   }
   else{
-    return(double (0));
+    return(T (0));
   }
 }
 
+// Explicit Instantiation
+
+template float kron_delta(int,int);
+template double kron_delta(int,int);
 
 
-// Green Function calculation
+// ------------------------------------------------------------------//
+// Templated Green Function 
 
-cx_rowvec G_ij(int i_sub, int j_sub, rowvec affect_point , rowvec source_point,double k_s , double k_p ,double rho , double omega){
-  rowvec pos_vector  = source_point - affect_point ;
-  double radius_mag = sqrt(pow(pos_vector(0),2)+pow(pos_vector(1),2)+pow(pos_vector(2),2));
+template <typename T>
+Row<complex<T>> G_ij(int i_sub, int j_sub, Row<T> affect_point , Row<T> source_point,T k_s, T k_p ,T rho, T omega){
+  Row<T> pos_vector  = source_point - affect_point ;
+  T radius_mag = sqrt(pow(pos_vector(0),2)+pow(pos_vector(1),2)+pow(pos_vector(2),2));
   
   // Defining The Required parameters
   
-  std::complex<double> img_start (0,1.0);
-  std::complex<double> e_p = exp(img_start * k_p * radius_mag)/radius_mag; 
-  std::complex<double> e_s = exp(img_start * k_s * radius_mag)/radius_mag;
-  std::complex<double> r_p = img_start * k_p / radius_mag - 1/pow(radius_mag,2);
-  std::complex<double> r_s = img_start * k_s / radius_mag - 1/pow(radius_mag,2);
+  std::complex<T> img_start (0,1.0);
+  std::complex<T> e_p = exp(img_start * k_p * radius_mag)/radius_mag; 
+  std::complex<T> e_s = exp(img_start * k_s * radius_mag)/radius_mag;
+  std::complex<T> r_p = img_start * k_p / radius_mag - 1/pow(radius_mag,2);
+  std::complex<T> r_s = img_start * k_s / radius_mag - 1/pow(radius_mag,2);
 
   
-  rowvec R_vec(3,fill::zeros);
-  for(int i = 0;i<3;++i){
+  Row<T> R_vec(3,fill::zeros);
+  for(size_t i = 0;i<3;++i){
     R_vec(i)= affect_point(i) - source_point(i);
   }
 
   // Calculating G_sub
 
-  cx_rowvec G_point(2,fill::zeros);
+  Row<complex<T>> G_point(2,fill::zeros);
   
-  G_point(0) = e_p *( pow(k_p,2) * R_vec(i_sub-1) *  R_vec(j_sub-1) + ( double (3) * R_vec(i_sub-1) *  R_vec(j_sub-1) -  kron_delta(i_sub,j_sub) ) * r_p) / ( 4 * M_PI *  rho * pow(omega,2));
-  G_point(1) = e_s *( pow(k_s,2) * ( kron_delta(i_sub,j_sub) -  R_vec(i_sub-1) *  R_vec(j_sub-1) ) - ( double (3) * R_vec(i_sub-1) *  R_vec(j_sub-1) -  kron_delta(i_sub,j_sub) ) * r_s)/ ( 4 * M_PI *  rho * pow(omega,2));
+  G_point(0) = e_p *( pow(k_p,2) * R_vec(i_sub-1) *  R_vec(j_sub-1) + ( T (3) * R_vec(i_sub-1) *  R_vec(j_sub-1) -  kron_delta<T>(i_sub,j_sub) ) * r_p) / ( 4 * M_PI *  rho * pow(omega,2));
+  G_point(1) = e_s *( pow(k_s,2) * ( kron_delta<T>(i_sub,j_sub) -  R_vec(i_sub-1) *  R_vec(j_sub-1) ) - ( T (3) * R_vec(i_sub-1) *  R_vec(j_sub-1) -  kron_delta<T>(i_sub,j_sub) ) * r_s)/ ( 4 * M_PI *  rho * pow(omega,2));
 
   return(G_point);
 }
 
 
-/* Code for Vector of Vector
-----------------------------------------------
-vector<vector<int>> matrix(RR, vector<int>(CC));
-ssss-----------------------------------------------*/
+// Explicit Instantiation
+
+template Row<complex<float>> G_ij(int,int,Row<float>,Row<float>,float,float,float,float);
+
+template Row<complex<double>> G_ij(int,int,Row<double>,Row<double>,double,double,double,double);
+
+// ------------------------------------------------------------------//
+
+
 
 // Genrate the Transformation cube for the observing plane for each source point
 
-cx_cube G_ps_mat_for_point(rowvec affect_point, rowvec source_point,double k_s , double k_p, double rho , double omega){
-  cx_cube G_ps_matrix(3,3,2,fill::zeros);
-  for(int i=0;i<3;++i){
-    for(int j=0;j<3;++j){
+template <typename T>
+Cube<complex<T>> G_ps_mat_for_point(Row<T> affect_point, Row<T> source_point,T k_s , T k_p, T rho , T omega){
+  Cube<complex<T>> G_ps_matrix(3,3,2,fill::zeros);
+  for(size_t i=0;i<3;++i){
+    for(size_t j=0;j<3;++j){
       G_ps_matrix.tube(i,j) = G_ij(i+1,j+1,affect_point,source_point,k_s ,k_p,rho,omega);
     }
   }
   return(G_ps_matrix);
 }
 
+// Explicit Instantiation
+template  Cube<complex<float>> G_ps_mat_for_point(Row<float>,Row<float>,float,float,float,float);
+
+template Cube<complex<double>> G_ps_mat_for_point(Row<double>,Row<double>,double,double,double,double);
+
+
+// ------------------------------------------------------------------//
 
 
 // Second Version for facilitate Displacemnt Caclualtuon
-
-cx_mat G_mat_for_point(rowvec affect_point , rowvec source_point,double k_s , double k_p,double rho , double omega){
-  cx_mat G_ps_matrix(3,3,fill::zeros);
+template <typename T>
+Mat<complex<T>> G_mat_for_point(Row<T> affect_point , Row<T> source_point,T k_s ,T k_p,T rho ,T omega){
+  Mat<complex<T>> G_ps_matrix(3,3,fill::zeros);
   for(int i=0;i<3;++i){
     for(int j=0;j<3;++j){
-      cx_rowvec place_h = G_ij(i+1,j+1,affect_point,source_point,k_s ,k_p,rho,omega);
+      Row<complex<T>> place_h = G_ij(i+1,j+1,affect_point,source_point,k_s ,k_p,rho,omega);
       G_ps_matrix(i,j) = place_h(0) + place_h(1);
     }
   }
   return(G_ps_matrix);
 }
 
+template Mat<complex<float>> G_mat_for_point(Row<float>,Row<float>,float,float,float ,float);
+
+template Mat<complex<double>> G_mat_for_point(Row<double>, Row<double>,double,double,double,double);
+// ------------------------------------------------------------------//
+
 
 // Cube Generation of G for a plane
-
-cx_3d G_gen(rowvec source_point_vector,mat target_point ,double k_s , double k_p,double rho , double omega){ 
-  double tar_vec_len = target_point.n_rows;
-  cx_3d G_vec_source(tar_vec_len,cx_mat(3,3));
-
+template <typename T>
+cx_3d<T> G_gen(Row<T> source_point_vector,Mat<T> target_point ,T k_s ,T k_p,T rho ,T omega){ 
+  int tar_vec_len = target_point.n_rows;
+  cx_3d<T> G_vec_source(tar_vec_len,cx_mat(3,3));
   for(int i =0;i<tar_vec_len;++i){
-    G_vec_source[i] = G_mat_for_point(target_point.row(i),source_point_vector,k_s,k_p,rho,omega);
+    G_vec_source[i] = G_mat_for_point<T>(target_point.row(i),source_point_vector,k_s,k_p,rho,omega);
   }
   //std::cout << "ol" << endl ;
   return(G_vec_source);
 }
 
+template cx_3d<float> G_gen(Row<float>,Mat<float> ,float ,float,float ,float);
+
+template cx_3d<double> G_gen(Row<double>,Mat<double> ,double ,double,double ,double);
+
+
+// ------------------------------------------------------------------//
+
+
 // The Whole matrix generation
-cx_4d_mat G_4d_full(mat source_point_mat, mat target_point_mat,double k_s , double k_p,double rho , double omega){
-  double no_of_source_point = source_point_mat.n_rows;
-  double no_of_target_point = target_point_mat.n_rows;
-  cx_4d_mat G_for_all_source_and_target(no_of_source_point,cx_3d(no_of_target_point,cx_mat(3,3,fill::zeros)));
+template<typename T>
+cx_4d_mat<T> G_4d_full(Mat<T> source_point_mat, Mat<T> target_point_mat,T k_s , T k_p,T rho , T omega){
+  int no_of_source_point = source_point_mat.n_rows;
+  int no_of_target_point = target_point_mat.n_rows;
+  cx_4d_mat<T> G_for_all_source_and_target(no_of_source_point,cx_3d(no_of_target_point,cx_mat(3,3,fill::zeros)));
   for (int i = 0; i < G_for_all_source_and_target.size(); ++i) {
-    G_for_all_source_and_target[i] = G_gen(source_point_mat.row(i),target_point_mat ,k_s , k_p,rho ,omega);
+    G_for_all_source_and_target[i] = G_gen<T>(source_point_mat.row(i),target_point_mat ,k_s , k_p,rho ,omega);
   }
   return(G_for_all_source_and_target);
 }
 
+template cx_4d_mat<float> G_4d_full(Mat<float>, Mat<float>,float, float,float , float);
+
+template cx_4d_mat<double> G_4d_full(Mat<double>, Mat<double>,double, double,double , double);
+
 // ------------------------------------------------------------------//
 // -----------------G Diff calculation procedures-------------------//
 // ----------------------------------------------------------------//
-
-std::complex<double> r_diff(double radius_mag,double k,double R_val){
-  std::complex<double> img_start(0,1.0);
-  std::complex<double> value_of_differential = 2 * R_val / pow(radius_mag,3) - img_start * k * R_val /  pow(radius_mag,2);
+template <typename T>
+complex<T> r_diff(T radius_mag,T k,T R_val){
+  complex<T> img_start(0,1.0);
+  complex<T> value_of_differential = 2 * R_val / pow(radius_mag,3) - img_start * k * R_val /  pow(radius_mag,2);
   return(value_of_differential);
 }
 
-cx_mat r_diff_mat_gen(rowvec affect_point , rowvec source_point,double k_s , double k_p){
-  rowvec R_vec(3,fill::zeros);
+template complex<float> r_diff(float,float,float);
+template complex<double> r_diff(double,double,double);
+
+// ----------------------------------------------------------------//
+template <typename T>
+Mat<T> r_diff_mat_gen(Row<T> affect_point , Row<T> source_point,T k_s , T k_p){
+  Row<T> R_vec(3,fill::zeros);
   for(int i = 0;i<3;++i){
     R_vec(i)= affect_point(i) - source_point(i);
   }
-  cx_mat r_diff_matrix(3,2,fill::zeros);
+  Row<T> r_diff_matrix(3,2,fill::zeros);
 
   // Now we are going to generate matrix in the same way formuals written in book
   // P - 1st column | S - Second Column
   // The rows are for the directional cosines
 
-  double radius_mag = vec_mag(source_point - affect_point);
+  T radius_mag = vec_mag<T>(source_point - affect_point);
 
   for(int i = 0 ; i < 3 ; ++i){ // i is for rows in matrix
     for(int j = 0 ; j < 2 ; ++j){ // J is for columns in matrix
       if(j == 0){
-	r_diff_matrix(i,j) = r_diff(radius_mag, k_p, R_vec(i));
+	r_diff_matrix(i,j) = r_diff<T>(radius_mag, k_p, R_vec(i));
       }else{
-	r_diff_matrix(i,j) = r_diff(radius_mag,k_s, R_vec(i));
+	r_diff_matrix(i,j) = r_diff<T>(radius_mag,k_s, R_vec(i));
       } 
     }
   }
   return(r_diff_matrix);
 }
 
+template Mat<float> r_diff_mat_gen(Row<float>,Row<float>,float, float);
+
+template Mat<double> r_diff_mat_gen(Row<double>,Row<double>,double, double);
+
+// ---------------------------------------------------------------------------------//
 // small subset_functions
 
 
-
-double eoiidi(double i_val ,rowvec R_vector,double r_mag){
-  double return_value =   - 2 * pow(R_vector(i_val),3) / r_mag + 2 * R_vector(i_val) / r_mag;
+template <typename T>
+T eoiidi(T i_val ,Row<T> R_vector,T r_mag){
+  T return_value =   - 2 * pow(R_vector(i_val),3) / r_mag + 2 * R_vector(i_val) / r_mag;
   return(return_value);
 }
 
-double eoijdk(double i_val ,double j_val ,rowvec R_vector,double r_mag){
-  double return_value =   -2 * R_vector(0) * R_vector(1) * R_vector(2) / r_mag ;
+template float eoiidi(float ,Row<float>,float);
+template double eoiidi(double ,Row<double>,double);
+
+template <typename T>
+T eoijdk(T i_val ,T j_val ,Row<T> R_vector,T r_mag){
+  T return_value =   -2 * R_vector(0) * R_vector(1) * R_vector(2) / r_mag ;
   return(return_value);
 }
 
-double eoiidj(double i_val ,double j_val ,rowvec R_vector,double r_mag){
-  double return_value =   -2 * R_vector(0) * R_vector(0) * R_vector(2) / r_mag ;
+template float eoijdk(float ,float ,Row<float>,float);
+template double eoijdk(double ,double ,Row<double>,double);
+  
+
+template <typename T>
+T eoiidj(T i_val ,T j_val ,Row<T> R_vector,T r_mag){
+  T return_value =   -2 * R_vector(0) * R_vector(0) * R_vector(2) / r_mag ;
   return(return_value);
 }
 
-double eoijdi(double i_val ,double j_val,rowvec R_vector,double r_mag){
-  double return_value =   - 2 * pow(R_vector(i_val),2) * R_vector(j_val) / r_mag +  R_vector(j_val) / r_mag;
+template float eoiidj(float ,float ,Row<float> ,float);
+template double eoiidj(double ,double ,Row<double> ,double);
+
+template <typename T>
+T eoijdi(T i_val ,T j_val,Row<T> R_vector,T r_mag){
+  T return_value =   - 2 * pow(R_vector(i_val),2) * R_vector(j_val) / r_mag +  R_vector(j_val) / r_mag;
   return(return_value);
 }
 
-double eo_d_universal(rowvec i_arr,rowvec R_vec, double r_mag){
-  double eo_val = 0;
+template float eoijdi(float ,float,Row<float>,float);
+template double eoijdi(double ,double,Row<double>,double);
+
+template <typename T>
+T eo_d_universal(Row<T> i_arr,Row<T> R_vec, T r_mag){
+  T eo_val = 0;
   if(i_arr(0) == i_arr(1)){
     if(i_arr(1) == i_arr(2)){
-      return(eoiidi(i_arr(0),R_vec,r_mag));
+      return(eoiidi<T>(i_arr(0),R_vec,r_mag));
     }
     else{
-      return(eoiidj(i_arr(0),i_arr(2),R_vec,r_mag));
+      return(eoiidj<T>(i_arr(0),i_arr(2),R_vec,r_mag));
     }
   }else{
     if(i_arr(1) == i_arr(2)){
-      return(eoijdi(i_arr(0),i_arr(2),R_vec,r_mag));
+      return(eoijdi<T>(i_arr(0),i_arr(2),R_vec,r_mag));
     }
     else{
-      return(eoijdk(i_arr(0),i_arr(2),R_vec,r_mag));
+      return(eoijdk<T>(i_arr(0),i_arr(2),R_vec,r_mag));
     }
   }
 }
 
+template float eo_d_universal(Row<float> ,Row<float> , float);
+template double eo_d_universal(Row<double> ,Row<double> , double);
+
 // ********************************************************************************************************************************//
 // Keeping in mind that the et is 3 times eo simply and we can use the above fucntions rather than writing the new fucntionsfor the
 // Calculations
+
 
 Mat<int> Combination_gen(){
   int n_comb_rows = 27;
@@ -206,8 +289,8 @@ Mat<int> Combination_gen(){
 // ------------------------------------------------------------------//
 // ---------------G p point calculation procedures------------------//
 // ----------------------------------------------------------------//
-
-double G_ijk_helper(rowvec ijk_thing){
+template <typename T>
+T G_ijk_helper(Row<T> ijk_thing){
   if(ijk_thing[0] == ijk_thing[1]){
     return -1;
   }
@@ -216,6 +299,9 @@ double G_ijk_helper(rowvec ijk_thing){
   }
 }
 
+template T G_ijk_helper(Row<T> ijk_thing);
+template T G_ijk_helper(Row<T> ijk_thing);
+  
 
 
 cx_double G_p_ijk (rowvec ijk_row_passed, rowvec affect_point, rowvec source_point,double k_s , double k_p,double rho , double omega){
