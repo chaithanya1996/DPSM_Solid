@@ -37,8 +37,9 @@ cx_4d_mat<T> G_4d_full(Mat<T> source_point_mat, Mat<T> target_point_mat,T k_s , 
 template <typename T>
 complex<T> r_diff(T radius_mag,T k,T R_val);
 
+
 template <typename T>
-Mat<T> r_diff_mat_gen(Row<T> affect_point , Row<T> source_point,T k_s , T k_p);
+Mat<complex<T>> r_diff_mat_gen(Row<T> affect_point , Row<T> source_point,T k_s , T k_p);
   
 template <typename T>
 T eoiidi(T i_val ,Row<T> R_vector,T r_mag);
@@ -94,13 +95,13 @@ template <typename T>
 Cube<T> stress_coff_point(Cube<T> G_ijk,T lamda,T mu);
 
 template <typename T>
-cx_5d<T> stress_coff_calc(const cx_5d<T>& G_ijk_source,T lamda,T mu);
+cx_5d<T> stress_coff_calc(const cx_5d<T> G_ijk_source,T lamda,T mu);
 
 template <typename T>
 cx_3d<T> stress_cal_one_source(cx_4d<T> G_ijk_cube, Row<complex<T>> strength_cube);
 
 template <typename T>
-cx_3d<T> stress_cal(const cx_5d<T> &G_ijk_source,Mat<complex<T>> src_str,T lamda,T mu);
+cx_3d<T> stress_cal(const cx_5d<T> G_ijk_source,Mat<complex<T>> src_str,T lamda,T mu);
 
 
 template <typename T>

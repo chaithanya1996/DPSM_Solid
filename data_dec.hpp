@@ -11,7 +11,6 @@
 using namespace arma;
 
 using std::sqrt;
-using std::pow;
 using std::cerr;
 using std::cout;
 using std::endl;
@@ -43,3 +42,11 @@ using cx_4d_mat = std::vector<cx_3d<T>>;
 
 template<typename T>
 using cx_5d = std::vector<cx_4d<T>>;
+
+
+template<class T>
+inline constexpr T pow(const T base, unsigned const exponent)
+{
+    // (parentheses not required in next line)
+    return (exponent == 0) ? 1 : (base * pow(base, exponent-1));
+}
