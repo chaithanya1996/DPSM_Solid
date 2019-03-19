@@ -3,7 +3,7 @@ CC = clang++
 CFLAGS= -larmadillo  -g -fopenmp -O3
 #WORKING_DIRECTORY = $(pwd)
 
-all: DPSM.cpp helper.o core.o #interface.o 
+all: DPSM.cpp helper.o core.o interface.o 
 	#$(CC) DPSM.cpp dpsm_helpers.o  dpsm_core.o dpsm_interface.o -o DPSM.o  $(CFLAGS)
 helper.o: dpsm_helpers.cpp dpsm_helpers.hpp
 	$(CC) -c dpsm_helpers.cpp -o dpsm_helpers.o $(CFLAGS)

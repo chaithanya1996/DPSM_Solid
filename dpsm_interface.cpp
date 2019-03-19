@@ -1,24 +1,29 @@
 #include "dpsm_interface.hpp"
 
 // Constructor For Solid Material
-dpsm::solid_material::solid_material(double mu_val, double lamda_val){
+template<typename T>
+dpsm::solid_material<T>::solid_material(T mu_val, T lamda_val){
   mu = mu_val;
   lamda = lamda_val;
 }
 
-// Solid Material Copy Constructor
-dpsm::solid_material::solid_material(const solid_material &other){
+
+// Solid Material Copy Constructo
+template<typename T>
+dpsm::solid_material<T>::solid_material(const solid_material<T> &other){
   mu = other.mu;
   lamda = other.lamda;
 }
 
 // Transducer Constructor
-dpsm::transducer::transducer(mat transducer_location_rowvec,rowvec normal_to_transducer){
+template<typename T>
+dpsm::transducer<T>::transducer(Mat<T> transducer_location_rowvec,Row<T> normal_to_transducer){
   transducer_location = transducer_location_rowvec;
   normal_to_transducer_storage = normal_to_transducer;
 }
 
-dpsm::solid_interface::solid_interface(mat interface_location,rowvec normal_to_solid_interf){
+template<typename T>
+dpsm::solid_interface<T>::solid_interface(Mat<T> interface_location,Row<T> normal_to_solid_interf){
   interface_source_1 = interface_location;
   normal_to_solid_interface = normal_to_solid_interf;
 }
@@ -40,9 +45,10 @@ Steps To Follow to create a Composite Hetrogeneous Medium
 1. check Transducer is present in the material if present inset into active sources
 2. Calculate the PAssive Source 
 ------------------------------------------------ */
-
-std::vector<dpsm::solid_ply> dpsm::geometry::get_the_material_grid(){
-  std::vector<dpsm::solid_ply> resulting_geometry(no_of_slices,dpsm::solid_ply());
+template<typename T>
+std::vector<dpsm::solid_ply<T>> dpsm::geometry<T>::get_the_material_grid(){
+  
+  std::vector<dpsm::solid_ply<T>> resulting_geometry(no_of_slices,dpsm::solid_ply<T>());
   for (int i = 0 ; i < no_of_slices; ++i) {
     
     if (!transducer_array[i].transducer_location.is_empty()) {
@@ -63,3 +69,21 @@ std::vector<dpsm::solid_ply> dpsm::geometry::get_the_material_grid(){
 
 // This Only Works for the Solid Composite case as the Interface is similar direction
 // Ideally we would need the get fucntion to handle this situation
+
+
+// Explicit Instantiations
+
+template class dpsm::solid_material<float>;
+template class dpsm::solid_material<double>;
+
+template class dpsm::transducer<float>;
+template class dpsm::transducer<double>;
+
+template class dpsm::solid_interface<float>;
+template class dpsm::solid_interface<double>;
+
+template class dpsm::solid_ply<float>;
+template class dpsm::solid_ply<double>;
+
+template class dpsm::geometry<float>;
+template class dpsm::geometry<double>;
