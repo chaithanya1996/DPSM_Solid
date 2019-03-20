@@ -35,9 +35,9 @@ using std::ofstream;
 #include <cstdlib>
 
 // This function is not working in the header file 
-dpsm::solid_interface combine_interface(dpsm::solid_interface interface1,dpsm::solid_interface interface2){
+dpsm::solid_interface<double> combine_interface(dpsm::solid_interface<double> interface1,dpsm::solid_interface<double> interface2){
   mat joined_mats = join_cols(interface1.interface_source_1,interface2.interface_source_1);
-  dpsm::solid_interface joint_interface_solid(joined_mats,interface1.normal_to_solid_interface);
+  dpsm::solid_interface <double> joint_interface_solid(joined_mats,interface1.normal_to_solid_interface);
   return(joint_interface_solid);
 };
 
@@ -138,8 +138,8 @@ int main(){
   double mu_st  = calc_mu(E_st,V_st);
 
   
-  dpsm::solid_material aluminium(lamda_al, mu_al);
-  dpsm::solid_material steel(lamda_st, mu_st);
+  dpsm::solid_material<double> aluminium(lamda_al, mu_al);
+  dpsm::solid_material<double> steel(lamda_st, mu_st);
 
 
   
@@ -178,18 +178,18 @@ int main(){
   
   // List of Interfaces Used in secondary Ply
 
-  dpsm::solid_interface interface_al(interface_line,normal_to_interface_reverse);
-  dpsm::solid_interface interface_al_st(interface_line,normal_to_interface);
-  dpsm::solid_interface interface_st_end(interface_line_st,normal_to_interface);
+  dpsm::solid_interface<double> interface_al(interface_line,normal_to_interface_reverse);
+  dpsm::solid_interface<double> interface_al_st(interface_line,normal_to_interface);
+  dpsm::solid_interface<double> interface_st_end(interface_line_st,normal_to_interface);
 
   // Creating the Transducer Type For Geometry preparation
 
-  dpsm::transducer ultrasonice_trasducer(source_point_locations,normal_to_location);
+  dpsm::transducer<double> ultrasonice_trasducer(source_point_locations,normal_to_location);
   
   // Preparing all Things for Dpsm Geometry thing
-  vector<dpsm::solid_material> material_array_exp(2,dpsm::solid_material());
-  vector<dpsm::solid_interface> Interface_array_exp(2,dpsm::solid_interface());
-  vector<dpsm::transducer> transducer_array_exp(2,dpsm::transducer());
+  vector<dpsm::solid_material<double>> material_array_exp(2,dpsm::solid_material<double>());
+  vector<dpsm::solid_interface<double>> Interface_array_exp(2,dpsm::solid_interface<double>());
+  vector<dpsm::transducer<double>> transducer_array_exp(2,dpsm::transducer<double>());
 
 
   cout << "Black Sheep 3" << endl; 
@@ -211,9 +211,9 @@ int main(){
   cout << "Black Sheep 4" << endl; 
   //mat obs_plane_location_ply_1 = grid_target_generator(x_space_ply_1,y_space_ply_1);  //   logically the program is complete
 
-  dpsm::geometry TOTAL_LAMINATE = dpsm::geometry(2,material_array_exp,transducer_array_exp,Interface_array_exp,r_s_tran);
+  dpsm::geometry<double> TOTAL_LAMINATE = dpsm::geometry<double>(2,material_array_exp,transducer_array_exp,Interface_array_exp,r_s_tran);
   cout << "Black Sheep 5" << endl; 
-  std::vector<dpsm::solid_ply> T_lam_ply_vec = TOTAL_LAMINATE.get_the_material_grid();
+  std::vector<dpsm::solid_ply<double>> T_lam_ply_vec = TOTAL_LAMINATE.get_the_material_grid();
   // Completed the Generation of Plane
 
   cout << "Black Sheep 6" << endl;
@@ -224,7 +224,7 @@ int main(){
   // }
 
   
-  cx_3d Transducer_stress_Cx_3d(source_point_locations.n_rows,cx_mat(3,3,fill::zeros));
+  cx_3d<double> Transducer_stress_Cx_3d(source_point_locations.n_rows,cx_mat(3,3,fill::zeros));
   for (int i= 0; i < source_point_locations.n_rows; ++i) {
     Transducer_stress_Cx_3d[i](0,0) = 1 * pow(10,5); 
   }
@@ -245,7 +245,7 @@ int main(){
   cx_mat  Result = get_strength_hetro(T_lam_ply_vec[0].active_sources, T_lam_ply_vec[0].passve_sources,r_s_tran,normal_to_location,Transducer_stress_Cx_3d,k_s_aluminium,k_p_aluminium,rho_al,omega_trans,mu_al,lamda_al);
 
   cout << "Black sheep 11" << endl ;
-  cx_3d Stress_resultants_Result =stress_from_points(T_lam_ply_vec[0].active_sources, Result, observation_target,k_s_aluminium,k_p_aluminium,rho_al,omega_trans,lamda_al,mu_al);
+  cx_3d<double> Stress_resultants_Result =stress_from_points(T_lam_ply_vec[0].active_sources, Result, observation_target,k_s_aluminium,k_p_aluminium,rho_al,omega_trans,lamda_al,mu_al);
   cout << "Black sheep 12" << endl ;
 
 
