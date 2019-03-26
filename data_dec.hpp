@@ -35,6 +35,10 @@ template<typename T>
 using cx_3d = std::vector<Mat<std::complex<T>>>;
 
 template<typename T>
+using Mat_3d = std::vector<Mat<T>>;
+
+
+template<typename T>
 using cx_4d = std::vector<Cube<std::complex<T>>>;
 
 template<typename T>

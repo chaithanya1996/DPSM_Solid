@@ -3,7 +3,7 @@
 
 template <typename TYPE>
 TYPE r_s_calculator(TYPE freq, TYPE c){
-  int safety_factor = 2;
+  int safety_factor = 1;
   TYPE r_s;
   r_s = c / freq / 2 / M_PI / safety_factor;
   return(r_s);
@@ -565,7 +565,8 @@ cx_3d<T> stress_cal(const cx_5d<T> G_ijk_source,Mat<complex<T>> src_str,T lamda,
   // MultiThreading the Calculations Using OPenMP
   #pragma omp parallel for
   for(size_t i = 0; i < src_str.n_cols; i++){
-    stress_on_plane = add_cx_3d(stress_on_plane,stress_cal_one_source<T>(G_ijk_source[i],src_str.row(i)));
+    cx_3d<T> temp_call = stress_cal_one_source<T>(G_ijk_source[i],src_str.row(i));
+    stress_on_plane = add_cx_3d<T>(stress_on_plane,temp_call);
   }
   return(stress_on_plane);
 }

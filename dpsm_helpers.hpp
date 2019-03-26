@@ -26,8 +26,7 @@ std::tuple<Mat<T>,Mat<T>> circle_maker(T d_r,T radii, Col<T> origin_circ , Row<T
 
 // rectangle generator
 template <typename T>
-Mat<T> rectangle_generator(Row<T> x, Row<T> y , Row<T> o , T x_div = 1000 , T y_div = 1000);
-
+Mat<T> rectangle_generator(Row<T> dir_vec_1, Row<T> dir_vec_2 , Row<T> origin , int x_div , int y_div);
 
 // ------------------------------------------------------------------//
 // -----------------Mesh Genrator Cube function---------------------//

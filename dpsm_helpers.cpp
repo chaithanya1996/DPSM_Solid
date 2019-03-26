@@ -168,32 +168,54 @@ std::tuple<Mat<T>,Mat<T>> circle_maker(T d_r,T radii, Col<T> origin_circ , Row<T
 
 // explicit Instantiation
 
-template
-std::tuple<Mat<float>,Mat<float>> circle_maker(float ,float, Col<float>, Row<float>);
+template std::tuple<Mat<float>,Mat<float>> circle_maker(float ,float, Col<float>, Row<float>);
+template std::tuple<Mat<double>,Mat<double>> circle_maker(double ,double, Col<double>, Row<double>);
 
-template
-std::tuple<Mat<double>,Mat<double>> circle_maker(double ,double, Col<double>, Row<double>);
 
+/* Input Explanation 
+The Input to the rectangle generator function 
+o - Corner
+x - Horizantal directional vector
+y - Vertical Directional Vector
+y_div - No of Divisions in Y directions
+x_div - No of Divisions in X Directions
+
+ASCII ART Below
+==============================
+y
+|
+|
+|y_div
+|
+|
+|
+|
+o---------------------------x
+       x_div
+=============================== 
+ */
 
 template <typename T>
-Mat<T> rectangle_generator(Row<T> x, Row<T> y , Row<T> o , T x_div , T y_div){
-  Row<T> x_dir_rat = x - o ;
-  Row<T> x_dir_cos = x_dir_rat  / vec_mag(x_dir_rat);
-  Row<T> y_dir_rat = y - o ;
-  Row<T> y_dir_cos = y_dir_rat  / vec_mag(y_dir_rat);
-  
-  Mat<T> Mesh_cube(x_div * y_div ,3,fill::zeros);
-  for(int i = 0;i < y_div; ++i){
-    Mesh_cube(span(i*x_div,(i+1)*x_div-1),span::all) =  line_generator<T>(o + i * y_dir_cos, o + i * y_dir_cos + x_div * x_dir_cos , x_div-1);
+Mat<T> rectangle_generator(Row<T> dir_vec_1, Row<T> dir_vec_2 , Row<T> origin , int x_div , int y_div){
+    Row<T> x_dir_rat =  dir_vec_1- origin ;
+    Row<T> x_dir_cos = x_dir_rat / (x_div-1);
+    Row<T> y_dir_rat = dir_vec_2 - origin ;
+    Row<T> y_dir_cos = y_dir_rat / (y_div-1);
 
-  }
-  return(Mesh_cube);
+    Mat<T> Rec_Point_Mat(x_div  * y_div ,3,fill::zeros);
+
+    for(int i = 0;i < y_div; ++i){
+        Rec_Point_Mat(span(i*x_div,(i+1)*x_div-1),span::all) =  line_generator<T>(origin + i * y_dir_cos  , origin + i * y_dir_cos + x_dir_rat , x_div-1);
+
+    }
+    return(Rec_Point_Mat);
 }
+
 
 // Explicit Instantiation
 
-template Mat<float> rectangle_generator(Row<float> , Row<float> , Row<float> , float x_div, float y_div);
-template Mat<double> rectangle_generator(Row<double> , Row<double> , Row<double> , double x_div, double y_div);
+template Mat<float> rectangle_generator(Row<float> , Row<float> , Row<float> ,int x_div, int y_div);
+template Mat<double> rectangle_generator(Row<double> , Row<double> , Row<double> , int x_div, int y_div);
 
 
 // ------------------------------------------------------------------//
@@ -250,7 +272,8 @@ int save_cx_3d(std::vector<Mat<T>> mat_to_be_saved, const std::string &PATH_TO_S
       for (int j=0; j < 3; ++j) {
 #pragma omp single
 	for (int i = 0; i < size_of_cx_3d; ++i) {
-	  outdata[k*3+j] << std::abs(mat_to_be_saved[i](0,0)) << endl;  
+	  //outdata[k*3+j] << std::abs(mat_to_be_saved[i](0,0)) << endl;  
+    outdata[k*3+j] << mat_to_be_saved[i](0,0)<< endl;  
 	}
       }
     }
@@ -262,6 +285,8 @@ int save_cx_3d(std::vector<Mat<T>> mat_to_be_saved, const std::string &PATH_TO_S
   return 0;
 }
 
+
+template int save_cx_3d<complex<float>>(std::vector<Mat<complex<float>>>, const std::string &);
 template int save_cx_3d<cx_double>(std::vector<Mat<cx_double>>, const std::string &);
 template int save_cx_3d<double>(std::vector<Mat<double>>, const std::string &);
 template int save_cx_3d<float>(std::vector<Mat<float>>, const std::string &);
