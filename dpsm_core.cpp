@@ -3,7 +3,7 @@
 
 template <typename TYPE>
 TYPE r_s_calculator(TYPE freq, TYPE c){
-  int safety_factor = 1;
+  int safety_factor = 10;
   TYPE r_s;
   r_s = c / freq / 2 / M_PI / safety_factor;
   return(r_s);
@@ -688,6 +688,8 @@ Col<complex<T>> source_strength_derivation(cx_5d<T> G_ijk_cube_of_sources,cx_3d<
 
   //std::cout << G_full_mat_form <<endl;
   cout << " Start_solving " << sources_len << endl;
+  G_full_mat_form.save("G_Full",csv_ascii);
+  str_mat.save("str_mat",csv_ascii);
   Col<complex<T>> col_one = solve(G_full_mat_form,str_mat);
   cout << " End Solving -" << sources_len << endl;
   return(col_one);
@@ -757,16 +759,26 @@ Mat<complex<T>> get_strength_hetro(Mat<T> source_point_list,Mat<T> passive_sourc
   for (int i = 0; i < no_of_active_sources; ++i) {
     exact_source_point_mat_stress.row(i) = source_point_list.row(i)  + direction_cosine * r_s ;
   }
+
+   // cout << source_point_list << endl;
+   // cout << "-------------------------------" << endl;
+   
+   // cout << passive_source_list << endl;
+   // cout << "-------------------------------" << endl;
+   
   cout << "Black Sheep 8" << endl;
   cx_5d<T> G_matrix_calculations(total_sources.n_rows,cx_4d<T>(no_of_active_sources ,Cube<complex<T>>(3,3,3,fill::zeros)));
 #pragma omp parallel for 
   for(int i = 0; i < total_sources.n_rows; ++i){
     //std::cout << i << "\n";
-    G_matrix_calculations[i] = G_p_diff_ijk<T>(total_sources.row(i),exact_source_point_mat_stress,k_s,k_p,rho ,omega);
+    G_matrix_calculations[i] =G_p_diff_ijk<T>(total_sources.row(i),exact_source_point_mat_stress,k_s,k_p,rho ,omega);
   }
-  cout << "Black Sheep 9" << endl;
+  
+  G_matrix_calculations = stress_coff_calc<T>(G_matrix_calculations,mu,lamda);
+  
+  cout << "Starting Solving Linear Equations" << endl;
   Col<complex<T>> solid_point_strength_colvec = source_strength_derivation(G_matrix_calculations,stress_matrix);
-  cout << "Black Sheep 10" << endl;
+  cout << "Completed Solving Linear Equations" << endl;
   int out_mat_rows =  solid_point_strength_colvec.n_elem/3;
   Mat<complex<T>> P_mat_form(out_mat_rows,3,fill::zeros);
   

@@ -120,7 +120,7 @@ template Mat<double> line_generator<double>(Row<double>, Row<double>,size_t);
 
 
 template<typename T>
-std::tuple<Mat<T>,Mat<T>> circle_maker(T d_r,T radii, Col<T> origin_circ , Row<T> normal){
+Mat<T> circle_maker(T d_r,T radii, Col<T> origin_circ , Row<T> normal){
 
   Row<T> n = normal/norm(normal);
   Row<T> y_axis_vector = {0,1,0};
@@ -136,9 +136,8 @@ std::tuple<Mat<T>,Mat<T>> circle_maker(T d_r,T radii, Col<T> origin_circ , Row<T
   rot.insert_rows(1,m);
   rot.insert_rows(2,n);
   
-  Mat<T> pos, norm ;
+  Mat<T> pos;
   int row_counter_pos = 0;
-  int row_counter_norms = 0;
 
   Col<T> loop_radians = regspace<Col<T>>(d_r,d_r,radii);
 
@@ -151,25 +150,19 @@ std::tuple<Mat<T>,Mat<T>> circle_maker(T d_r,T radii, Col<T> origin_circ , Row<T
 
       Col<T> dpos = {T(std::cos(2*M_PI*no_division[j]/a_n)),T(std::sin(2*M_PI*no_division[j]/a_n)),0} ;
       dpos = dpos * loop_radians[i];
-
-      
       Col<T> npos = origin_circ +  rot.t() * dpos ;
-     
       Row<T> npos_rowvec =  conv_to<Row<T>>::from(npos);
       pos.insert_rows(row_counter_pos,npos_rowvec);
       row_counter_pos++;
-      norm.insert_rows(row_counter_norms,normal);  // this shit is messes up need to Rethink it
-      row_counter_norms++;
-      
     }
   }
-  return std::make_tuple(pos,norm);
+  return pos;
 }
 
 // explicit Instantiation
 
-template std::tuple<Mat<float>,Mat<float>> circle_maker(float ,float, Col<float>, Row<float>);
-template std::tuple<Mat<double>,Mat<double>> circle_maker(double ,double, Col<double>, Row<double>);
+template Mat<float> circle_maker(float ,float, Col<float>, Row<float>);
+template Mat<double> circle_maker(double ,double, Col<double>, Row<double>);
 
 
 /* Input Explanation 
@@ -197,11 +190,15 @@ o---------------------------x
 
 template <typename T>
 Mat<T> rectangle_generator(Row<T> dir_vec_1, Row<T> dir_vec_2 , Row<T> origin , int x_div , int y_div){
+    cout << "----1------" << endl;
     Row<T> x_dir_rat =  dir_vec_1- origin ;
+    cout << "----2------" << endl;
     Row<T> x_dir_cos = x_dir_rat / (x_div-1);
+    cout << "----3------" << endl;
     Row<T> y_dir_rat = dir_vec_2 - origin ;
+    cout << "----4------" << endl;
     Row<T> y_dir_cos = y_dir_rat / (y_div-1);
-
+    cout << x_div << "========" << y_div << endl;
     Mat<T> Rec_Point_Mat(x_div  * y_div ,3,fill::zeros);
 
     for(int i = 0;i < y_div; ++i){

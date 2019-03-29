@@ -7,7 +7,6 @@
 #include <fstream>
 #include <cmath>
 
-
 using namespace arma;
 
 using std::sqrt;

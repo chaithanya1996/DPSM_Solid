@@ -97,9 +97,9 @@ int main(){
    ----------------------------------*/
 
     // Transducer Properties
-  P_DTYPE trans_freq = 500 * kHz;
+  P_DTYPE trans_freq = 200 * kHz;
   P_DTYPE omega_trans = 2 * M_PI * trans_freq ;
-  P_DTYPE Transducer_diameter = 1 * mm ;
+  P_DTYPE Transducer_diameter = 20 * mm ;
 
   // Transducer Properties in Aluminium
 
@@ -109,21 +109,33 @@ int main(){
   // calculating the r_s for given Transducer and Medium 
 
   P_DTYPE r_s_tran = r_s_calculator<P_DTYPE>(trans_freq,c_al);
-  
-  int No_of_transducer_points = int(Transducer_diameter / r_s_tran); // Type Casting to Int 
+  //P_DTYPE r_s_tran = 0.0002;
+  cout << " The Distance Between Transducer Source Points --" << r_s_tran << endl; 
   
   Row<P_DTYPE> normal_to_location = {1,0,0};
-  Row<P_DTYPE> start_line_source = {0,0,0};
- 
-  Mat<P_DTYPE> source_point_locations,source_point_locations_normals;
-  Col<P_DTYPE> origin_of_circle = {0,0,0};
-  // Cicular Source Generration
+  Row<P_DTYPE> normal_to_location_reverse = {-1,0,0};
 
-  std::tie(source_point_locations,source_point_locations_normals) = circle_maker<P_DTYPE>(r_s_tran,Transducer_diameter, origin_of_circle , normal_to_location);
+  
+  // Row<P_DTYPE> source_origin = {0,-0.01,-0.01};
+  // Row<P_DTYPE> source_y = {0,0.01,-0.01};
+  // Row<P_DTYPE> source_x = {0,-0.01,0.01};
 
-  cout << "-----------------" << endl;
-  cout << source_point_locations << endl;
+  // int  source_x_div = int(vec_mag<P_DTYPE>(source_x) / r_s_tran) ;
+  // int  source_y_div = int(vec_mag<P_DTYPE>(source_y) / r_s_tran);
 
+  // cout << " No of Divisions in Direction 1 := " << vec_mag<P_DTYPE>(source_x) << "--" << source_x_div << endl ;
+  // cout << " No of Divisions in Direction 2 := " << vec_mag<P_DTYPE>(source_y) << "--" <<  source_y_div << endl ;
+  
+  //  // Cicular Source Generration
+  // Mat<P_DTYPE> source_point_locations = rectangle_generator<P_DTYPE>(source_x,source_y,source_origin,source_x_div,source_y_div);
+
+  Row<P_DTYPE> source_st = {0,-0.2,0};
+  Row<P_DTYPE> source_end = {0,0.2,0};
+  int source_divs = vec_mag<P_DTYPE>(source_st - source_end)/r_s_tran;
+  cout << "No of Sources" <<  source_divs << endl;
+  Mat<P_DTYPE> source_point_locations = line_generator<P_DTYPE>(source_st,source_end,source_divs-1);
+  
+  
   /* Design Of Experiment 
      Phase - 1 : Apply Boundary Condiitons and Accuire Stregnth of sources determined
      Phase - 2 : Get Actual Strengths as an image
@@ -134,6 +146,7 @@ int main(){
     /* --------------------------------
       Alumnium  Material Properties
    ----------------------------------*/
+  
   P_DTYPE GPa = pow(10,9);
   P_DTYPE E_al = 69 * GPa, V_al = 0.334;
   P_DTYPE E_st = 200 * GPa, V_st = 0.305;
@@ -148,71 +161,84 @@ int main(){
   dpsm::solid_material<P_DTYPE> aluminium(lamda_al, mu_al);
   dpsm::solid_material<P_DTYPE> steel(lamda_st, mu_st);
   
-  
+  cout << "Materials Are Defined" << endl;
   // place of Observation 
 
-  Row<P_DTYPE> x_space_ply_1 = regspace<Row<P_DTYPE>>(0,0.001,0.05);
+  Row<P_DTYPE> x_space_ply_1 = regspace<Row<P_DTYPE>>(0.0,0.001,0.05);
   Row<P_DTYPE> x_space_ply_2 = regspace<Row<P_DTYPE>>(0.05,0.001,0.1);
-  Row<P_DTYPE> y_space_ply_1 = regspace<Row<P_DTYPE>>(0,0.001,0.2);
-  Row<P_DTYPE> y_space_ply_2 = regspace<Row<P_DTYPE>>(0,0.001,0.2);
+  Row<P_DTYPE> y_space_ply_1 = regspace<Row<P_DTYPE>>(0.0,0.001,0.2);
+  Row<P_DTYPE> y_space_ply_2 = regspace<Row<P_DTYPE>>(0.0,0.001,0.2);
 
-  Mat<P_DTYPE> observation_target_1 = grid_target_generator<P_DTYPE>(x_space_ply_1,y_space_ply_1); // Observation Point in Ply 1
-  Mat<P_DTYPE> observation_target_2 = grid_target_generator<P_DTYPE>(x_space_ply_2,y_space_ply_2); // Observation Point in Ply 1
+  //Mat<P_DTYPE> observation_target_1 = grid_target_generator<P_DTYPE>(x_space_ply_1,y_space_ply_1); // Observation Point in Ply 1
+  //Mat<P_DTYPE> observation_target_2 = grid_target_generator<P_DTYPE>(x_space_ply_2,y_space_ply_2); // Observation Point in Ply 1
 
-  observation_target_1.save("OBSER_1.csv",csv_ascii);
-  observation_target_2.save("OBSER_2.csv",csv_ascii);
+  //observation_target_1.save("OBSER_1.csv",csv_ascii);
+  //observation_target_2.save("OBSER_2.csv",csv_ascii);
   
-  cout << observation_target_1.n_rows << " ------" << observation_target_1.n_cols << "---------" << observation_target_1.n_elem << endl;
-  cout << observation_target_2.n_rows << " ------" << observation_target_2.n_cols << "---------" << observation_target_2.n_elem << endl;
+  //cout << observation_target_1.n_rows << " ------" << observation_target_1.n_cols << "---------" << observation_target_1.n_elem << endl;
+  //cout << observation_target_2.n_rows << " ------" << observation_target_2.n_cols << "---------" << observation_target_2.n_elem << endl;
 
 
   /* Defining And Assigning the Interfaces */
   
   // Interface Vector 
 
-  Row<P_DTYPE> al_st_interface_origin = {0.05,-0.1,-0.05};
-  Row<P_DTYPE> al_st_interface_y = {0.05,0.1,-0.05};
-  Row<P_DTYPE> al_st_interface_x = {0.05,0.1,0.05};
-  int  al_st_x_div = int(vec_mag<P_DTYPE>(al_st_interface_x) / r_s_tran) ;
-  int  al_st_y_div = int(vec_mag<P_DTYPE>(al_st_interface_y) / r_s_tran) ;
-  Mat<P_DTYPE> al_st_interface = rectangle_generator<P_DTYPE>(al_st_interface_x,al_st_interface_y,al_st_interface_origin,al_st_x_div,al_st_y_div);
+  // Row<P_DTYPE> al_st_interface_origin = {0.05,-0.01,-0.01};
+  // Row<P_DTYPE> al_st_interface_y = {0.05,0.01,-0.01};
+  // Row<P_DTYPE> al_st_interface_x = {0.05,-0.01,0.01};
+  // int  al_st_x_div = int(vec_mag<P_DTYPE>(al_st_interface_x) / r_s_tran) ;
+  // int  al_st_y_div = int(vec_mag<P_DTYPE>(al_st_interface_y) / r_s_tran) ;
+  // Mat<P_DTYPE> al_st_interface = rectangle_generator<P_DTYPE>(al_st_interface_x,al_st_interface_y,al_st_interface_origin,al_st_x_div,al_st_y_div);
 
-   al_st_interface.save("al_st_interface.dat",csv_ascii); 
+  Row<P_DTYPE> al_st_int_st = {0.05,-0.2,0};
+  Row<P_DTYPE> al_st_int_end = {0.05,0.2,0};
+  int al_st_divs = vec_mag<P_DTYPE>(al_st_int_st - al_st_int_end)/r_s_tran;
+  Mat<P_DTYPE> al_st_interface = line_generator<P_DTYPE>(source_st,source_end,al_st_divs-1);
+  
+  al_st_interface.save("al_st_interface.csv",csv_ascii);
+
+
   // STEEL interface END
   
   Row<P_DTYPE> normal_to_interface = {1,0,0};
   Row<P_DTYPE> normal_to_interface_reverse = {-1,0,0};
 
-  Row<P_DTYPE> st_end_interface_origin = {0.1,-0.1,-0.05};
-  Row<P_DTYPE> st_end_interface_y = {0.1,0.1,-0.05};
-  Row<P_DTYPE> st_end_interface_x = {0.1,0.1,0.05};
-  int  st_end_x_div = int(vec_mag<P_DTYPE>(st_end_interface_x) / r_s_tran) ;
-  int  st_end_y_div = int(vec_mag<P_DTYPE>(st_end_interface_y) / r_s_tran) ;
-  Mat<P_DTYPE> st_end_interface = rectangle_generator<P_DTYPE>(st_end_interface_x,st_end_interface_y,st_end_interface_origin,st_end_x_div,st_end_y_div);
+  // Row<P_DTYPE> st_end_interface_origin = {0.1,-0.01,-0.01};
+  // Row<P_DTYPE> st_end_interface_y = {0.1,0.01,-0.01};
+  // Row<P_DTYPE> st_end_interface_x = {0.1,-0.01,0.01};
+  // int  st_end_x_div = int(vec_mag<P_DTYPE>(st_end_interface_x) / r_s_tran) ;
+  // int  st_end_y_div = int(vec_mag<P_DTYPE>(st_end_interface_y) / r_s_tran) ;
+  // Mat<P_DTYPE> st_end_interface = rectangle_generator<P_DTYPE>(st_end_interface_x,st_end_interface_y,st_end_interface_origin,st_end_x_div,st_end_y_div);
 
-  Row<P_DTYPE> test_origin = {5,0,0};
-  Row<P_DTYPE> test_x = {5,6,0};
-  Row<P_DTYPE> test_y = {5,0,6};
-  Mat<P_DTYPE> test = rectangle_generator<P_DTYPE>(test_x,test_y,test_origin,2,2);
-
-  al_st_interface.save("test.dat",csv_ascii); 
+  Row<P_DTYPE> st_end_int_st = {0.1,-0.2,0};
+  Row<P_DTYPE> st_end_int_end = {0.1,0.2,0};
+  int st_end_divs = vec_mag<P_DTYPE>(al_st_int_st - al_st_int_end)/r_s_tran;
+  Mat<P_DTYPE> st_end_interface = line_generator<P_DTYPE>(source_st,source_end,st_end_divs-1);
+  
+  st_end_interface.save("st_end_interface.csv",csv_ascii); 
   // List of Interfaces Used in secondary Ply
 
+  /*---------------------------------------
+    We are using Physical Interfaces While Creating the interfaces
+   -----------------------------------------*/
   dpsm::solid_interface<P_DTYPE> interface_al(al_st_interface,normal_to_interface_reverse);
   dpsm::solid_interface<P_DTYPE> interface_al_st(al_st_interface,normal_to_interface);
   dpsm::solid_interface<P_DTYPE> interface_st_end(st_end_interface,normal_to_interface);
 
   // Creating the Transducer Type For Geometry preparation
 
-  dpsm::transducer<P_DTYPE> ultrasonice_trasducer(source_point_locations,normal_to_location);
+  dpsm::transducer<P_DTYPE> ultrasonice_trasducer(source_point_locations,normal_to_location_reverse);
   
   // Preparing all Things for Dpsm Geometry thing
+
+  cout << "Started Creating the Containers for Holding the Geometrical Contents" << endl ;
+  
   vector<dpsm::solid_material<P_DTYPE>> material_array_exp(2,dpsm::solid_material<P_DTYPE>());
   vector<dpsm::solid_interface<P_DTYPE>> Interface_array_exp(2,dpsm::solid_interface<P_DTYPE>());
   vector<dpsm::transducer<P_DTYPE>> transducer_array_exp(2,dpsm::transducer<P_DTYPE>());
 
 
-  cout << "Black Sheep 3" << endl; 
+  cout << "Created the Containters For Holding Geometrical Entities" << endl; 
   // Assign The vector of Things
   
   material_array_exp[0] = aluminium;
@@ -228,16 +254,19 @@ int main(){
   transducer_array_exp[0] = ultrasonice_trasducer;
     
   //grid generation
-  cout << "Black Sheep 4" << endl; 
+  cout << "Assigned the Entities in Respective Positions" << endl; 
   //mat obs_plane_location_ply_1 = grid_target_generator(x_space_ply_1,y_space_ply_1);  //   logically the program is complete
 
   dpsm::geometry<P_DTYPE> TOTAL_LAMINATE(2,material_array_exp,transducer_array_exp,Interface_array_exp,r_s_tran);
   
-  cout << "Black Sheep 5" << endl; 
+  cout << "Created The Geometry With The Propery Matreial" << endl; 
   std::vector<dpsm::solid_ply<P_DTYPE>> T_lam_ply_vec = TOTAL_LAMINATE.get_the_material_grid();
+  /* Note 
+   The get_material_grid funtion puts the percieved or imaginary location of active passive sources and thus doesnt contain the physical location 
+   */
   // Completed the Generation of Plane
 
-  cout << "Black Sheep 6" << endl;
+  cout << "Generated the Compuation Grid With Proper Boundaries" << endl;
 
   // mat Transducer_sterss_matrix(source_point_locations.n_rows,3,fill::zeros);
   // for (int i = 0; i <Transducer_sterss_matrix.n_rows ; ++i) {
@@ -247,9 +276,9 @@ int main(){
   
   cx_3d<P_DTYPE> Transducer_stress_Cx_3d(source_point_locations.n_rows,Mat<complex<P_DTYPE>>(3,3,fill::zeros));
   for (int i= 0; i < source_point_locations.n_rows; ++i) {
-    Transducer_stress_Cx_3d[i](0,0) = 1 * pow(10,5); 
+    Transducer_stress_Cx_3d[i](0,0) = 1 * pow(10,8); 
   }
-
+  //cout <<  Transducer_stress_Cx_3d.size() << endl;
   // Path - /home/chaithanya/Documents/DPSM/Package/Results
 
   
@@ -282,18 +311,21 @@ int main(){
   /* -----------------------------------------------------
 
      ------------------------------------------------------ */
-  cx_3d<P_DTYPE> sigma_resultant_interface =stress_from_points<P_DTYPE>(T_lam_ply_vec[0].active_sources, Result, al_st_interface,k_s_aluminium,k_p_aluminium,rho_al,omega_trans,lamda_al,mu_al);
+  cx_3d<P_DTYPE> sigma_resultant_interface =stress_from_points<P_DTYPE>(T_lam_ply_vec[0].active_sources, Result, al_st_interface ,k_s_aluminium,k_p_aluminium,rho_al,omega_trans,lamda_al,mu_al);
 
    cout << "Black sheep 12" << endl ;
  
-   cout << T_lam_ply_vec[1].active_sources.n_rows << endl;
-   cout << "Black sheep 13" << endl ;
-   cout << T_lam_ply_vec[1].passve_sources.n_rows << endl;
+   // cout << T_lam_ply_vec[1].active_sources.n_rows << endl;
+   // cout << "Black sheep 13" << endl ;
+   // cout << T_lam_ply_vec[1].passve_sources.n_rows << endl;
 
-   cout << al_st_interface << endl;
-   Row<P_DTYPE> dummmy_normal = {0,0,0};
-
-   // Mat<complex<P_DTYPE>> Result_2 = get_strength_hetro(al_st_interface, T_lam_ply_vec[1].passve_sources,r_s_tran,dummmy_normal,sigma_resultant_interface,k_s_aluminium,k_p_aluminium,rho_al,omega_trans,mu_al,lamda_al);
+   // cout << al_st_interface << endl;
+   // cout << "-------------------------------" << endl;
+   // cout << T_lam_ply_vec[1].passve_sources << endl;
+   // cout << "-------------------------------" << endl;
+   Row<P_DTYPE> dummmy_normal = {-1,0,0};
    int Sucess = save_cx_3d<complex<P_DTYPE>>(sigma_resultant_interface,PATH_TO_SAVE_RESULTS);
+   Mat<complex<P_DTYPE>> Result_2 = get_strength_hetro(al_st_interface, T_lam_ply_vec[1].passve_sources,r_s_tran,dummmy_normal,sigma_resultant_interface,k_s_aluminium,k_p_aluminium,rho_al,omega_trans,mu_al,lamda_al);
+   
   return(0);
 }

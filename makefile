@@ -1,5 +1,5 @@
-#CC = g++
-CC = clang++
+CC = g++
+#CC = clang++
 CFLAGS= -larmadillo  -g -fopenmp -O3
 #WORKING_DIRECTORY = $(pwd)
 

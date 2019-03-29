@@ -22,7 +22,7 @@ Mat<T> line_generator(Row<T> start, Row<T> end , size_t no_divisions = 20);
 
 // Circle maker Fucntion
 template<typename T>
-std::tuple<Mat<T>,Mat<T>> circle_maker(T d_r,T radii, Col<T> origin_circ , Row<T> normal);
+Mat<T> circle_maker(T d_r,T radii, Col<T> origin_circ , Row<T> normal);
 
 // rectangle generator
 template <typename T>
