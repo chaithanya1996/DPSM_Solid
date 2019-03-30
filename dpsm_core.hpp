@@ -1,7 +1,7 @@
 #include "dpsm_helpers.hpp"
 
 
-template <typename TYPE>TYPE r_s_calculator(TYPE freq, TYPE c);
+template <typename TYPE>TYPE r_s_calculator(TYPE freq, TYPE c,int safety_factor);
 
 // Kron Delta _funtion
 
@@ -115,4 +115,4 @@ template<typename T>
 Mat<complex<T>> get_strength(Mat<T> source_point_list,T r_s,Row<T> direction_cosine,cx_3d<T> stress_matrix,T k_s,T k_p,T rho , T omega);
 
 template <typename T>
-Mat<complex<T>> get_strength_hetro(Mat<T> source_point_list,Mat<T> passive_source_list ,T r_s, Row<T> direction_cosine,cx_3d<T> stress_matrix,T k_s,T k_p,T rho , T omega,T mu,T lamda);
+Mat<complex<T>> get_strength_hetro(Mat<T> source_point_list,Mat<T> passive_source_list ,T r_s, Row<T> direction_cosine,cx_3d<T> stress_matrix,T k_s,T k_p,T rho , T omega,T mu,T lamda,bool have_active_sources);

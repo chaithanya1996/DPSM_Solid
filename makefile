@@ -1,6 +1,7 @@
 CC = g++
 #CC = clang++
-CFLAGS= -larmadillo  -g -fopenmp -O3
+INTEL_MKL= -Wl,--start-group ${MKLROOT}/lib/intel64/libmkl_intel_lp64.a ${MKLROOT}/lib/intel64/libmkl_gnu_thread.a ${MKLROOT}/lib/intel64/libmkl_core.a -Wl,--end-group -lgomp -lpthread -lm -ldl 
+CFLAGS=  -lopenblas -llapack  -larmadillo  -g -fopenmp -O3 #$(INTEL_MKL) -m64 -I${MKLROOT}/include
 #WORKING_DIRECTORY = $(pwd)
 
 all: DPSM.cpp helper.o core.o interface.o 

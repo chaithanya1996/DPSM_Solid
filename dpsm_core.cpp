@@ -2,8 +2,7 @@
 
 
 template <typename TYPE>
-TYPE r_s_calculator(TYPE freq, TYPE c){
-  int safety_factor = 10;
+TYPE r_s_calculator(TYPE freq, TYPE c,int safety_factor){
   TYPE r_s;
   r_s = c / freq / 2 / M_PI / safety_factor;
   return(r_s);
@@ -11,8 +10,8 @@ TYPE r_s_calculator(TYPE freq, TYPE c){
 
 // Explicit Instantiation
 
-template float r_s_calculator(float,float);
-template double r_s_calculator(double,double);
+template float r_s_calculator(float,float,int safety_factor);
+template double r_s_calculator(double,double,int safety_factor);
 
 // ------------------------------------------------------------------//
 // ---------------Green generator Catergory-------------------------//
@@ -55,15 +54,17 @@ Row<complex<T>> G_ij(int i_sub, int j_sub, Row<T> affect_point , Row<T> source_p
 
   Row<T> R_vec(3,fill::zeros);
   for(size_t i = 0;i<3;++i){
-    R_vec(i)= affect_point(i) - source_point(i);
+    R_vec(i)= (affect_point(i) - source_point(i))/radius_mag;
   }
 
   // Calculating G_sub
 
   Row<complex<T>> G_point(2,fill::zeros);
   
-  G_point(0) = e_p *( T(pow<T>(k_p,2)) * R_vec(i_sub-1) *  R_vec(j_sub-1) + ( T (3) * R_vec(i_sub-1) *  R_vec(j_sub-1) -  kron_delta<T>(i_sub,j_sub) ) * r_p) / T( 4 * M_PI *  rho * pow<T>(omega,2));
-  G_point(1) = e_s *( T(pow<T>(k_s,2)) * ( kron_delta<T>(i_sub,j_sub) -  R_vec(i_sub-1) *  R_vec(j_sub-1) ) - ( T (3) * R_vec(i_sub-1) *  R_vec(j_sub-1) -  kron_delta<T>(i_sub,j_sub) ) * r_s)/ T( 4 * M_PI *  rho * pow<T>(omega,2));
+  G_point(0) =( e_p *( T(pow<T>(k_p,2)) * R_vec(i_sub-1) *  R_vec(j_sub-1) + ( T (3) * R_vec(i_sub-1) *  R_vec(j_sub-1) -  kron_delta<T>(i_sub,j_sub) ) * r_p))/ T( 4 * M_PI *  rho * pow<T>(omega,2));
+
+  
+  G_point(1) =( e_s *( T(pow<T>(k_s,2)) * ( kron_delta<T>(i_sub,j_sub) -  R_vec(i_sub-1) *  R_vec(j_sub-1) ) - ( T (3) * R_vec(i_sub-1) *  R_vec(j_sub-1) -  kron_delta<T>(i_sub,j_sub) ) * r_s)) / T( 4 * M_PI *  rho * pow<T>(omega,2));
 
   return(G_point);
 }
@@ -334,9 +335,12 @@ complex<T> G_p_ijk (Row<T> ijk_row_passed, Row<T> affect_point_this, Row<T> sour
   Row<complex<T>> G_place_holder =  G_ij<T>(ijk_row[0],ijk_row[1],affect_point_this,source_point_this,k_s ,k_p,rho ,omega);
   
   ijk_row =  ijk_row_passed ;
-  complex<T> Gpiidi  = e_p * ( pow<T>(k_p,2) *  eo_d_universal(ijk_row,R_vec,radius_mag) +  ( G_ijk_helper(ijk_row) +3 * R_vec[ijk_row[0]] * R_vec[ijk_row[1]]) * R_differ_mat(ijk_row[2],0) +  r_p * T (3) * eo_d_universal(ijk_row,R_vec,radius_mag)) / complex<T>( 4 * M_PI *  rho * pow<T>(omega,2)) + G_place_holder[0] * (img_start * R_vec[ijk_row[2]] * e_p - R_vec[ijk_row[2]] * e_p / radius_mag);			 
+  complex<T> Gpiidi  = (e_p * ( pow<T>(k_p,2) *  eo_d_universal(ijk_row,R_vec,radius_mag) +
+	    ( G_ijk_helper(ijk_row) +3 * R_vec[ijk_row[0]] * R_vec[ijk_row[1]]) * R_differ_mat(ijk_row[2],0) +  r_p * T (3) * eo_d_universal(ijk_row,R_vec,radius_mag)))
+    / complex<T>( 4 * M_PI *  rho * pow<T>(omega,2)) +
+    G_place_holder[0] * (img_start * R_vec[ijk_row[2]] * e_p - R_vec[ijk_row[2]] * e_p / radius_mag);			 
 
-  complex<T> Gsiidi  = e_s * ( -pow<T>(k_s,2) *  eo_d_universal(ijk_row,R_vec,radius_mag) -  ( G_ijk_helper(ijk_row) +3 * R_vec[ijk_row[0]] * R_vec[ijk_row[1]]) * R_differ_mat(ijk_row[2],0) +  r_s * T (3) * eo_d_universal(ijk_row,R_vec,radius_mag)) / complex<T>( 4 * M_PI *  rho * pow<T>(omega,2))+ G_place_holder[1] * (img_start * R_vec[ijk_row[2]] * e_s - R_vec[ijk_row[2]] * e_s / radius_mag);			 
+  complex<T> Gsiidi  = (e_s * ( -pow<T>(k_s,2) *  eo_d_universal(ijk_row,R_vec,radius_mag) -  ( G_ijk_helper(ijk_row) +3 * R_vec[ijk_row[0]] * R_vec[ijk_row[1]]) * R_differ_mat(ijk_row[2],0) +  r_s * T (3) * eo_d_universal(ijk_row,R_vec,radius_mag))) / complex<T>( 4 * M_PI *  rho * pow<T>(omega,2))+ G_place_holder[1] * (img_start * R_vec[ijk_row[2]] * e_s - R_vec[ijk_row[2]] * e_s / radius_mag);			 
   
   return Gpiidi + Gsiidi ;
 }
@@ -639,7 +643,7 @@ template <typename T>
 Col<complex<T>> source_strength_derivation(cx_5d<T> G_ijk_cube_of_sources,cx_3d<T> stress_matrix){
   
   int sources_len = stress_matrix.size();
-  cout << " Source Lenngth -" << sources_len << endl;
+  cout << " Source Strength Derivation No_of Source Supplied -" << sources_len << endl;
   // cx_mat str_mat(sources_len*stress_matrix[0].n_rows,stress_matrix[0].n_cols,fill::zeros);
   Col<complex<T>> str_mat(sources_len * stress_matrix[0].n_elem);
 
@@ -688,8 +692,8 @@ Col<complex<T>> source_strength_derivation(cx_5d<T> G_ijk_cube_of_sources,cx_3d<
 
   //std::cout << G_full_mat_form <<endl;
   cout << " Start_solving " << sources_len << endl;
-  G_full_mat_form.save("G_Full",csv_ascii);
-  str_mat.save("str_mat",csv_ascii);
+  G_full_mat_form.save("D_BUG_G_Full.csv",csv_ascii);
+  str_mat.save("D_BUG_str_mat.csv",csv_ascii);
   Col<complex<T>> col_one = solve(G_full_mat_form,str_mat);
   cout << " End Solving -" << sources_len << endl;
   return(col_one);
@@ -741,8 +745,9 @@ template Mat<complex<double>> get_strength(Mat<double>,double,Row<double>,cx_3d<
 
 
 template <typename T>
-Mat<complex<T>> get_strength_hetro(Mat<T> source_point_list,Mat<T> passive_source_list ,T r_s, Row<T> direction_cosine,cx_3d<T> stress_matrix,T k_s,T k_p,T rho , T omega,T mu,T lamda){
+Mat<complex<T>> get_strength_hetro(Mat<T> source_point_list,Mat<T> passive_source_list ,T r_s, Row<T> direction_cosine,cx_3d<T> stress_matrix,T k_s,T k_p,T rho , T omega,T mu,T lamda,bool have_active_sources){
 
+  
   // incoming Point Locations are Exact Location on which the Sources are placed
   
   int no_of_active_sources = source_point_list.n_rows;
@@ -751,9 +756,13 @@ Mat<complex<T>> get_strength_hetro(Mat<T> source_point_list,Mat<T> passive_sourc
   Mat<complex<T>> active_source_str(no_of_active_sources,3,fill::zeros);
   Mat<complex<T>> passive_source_str(no_of_passive_sources,3,fill::zeros);
 
-  Mat<T> total_sources = join_cols(source_point_list,passive_source_list);
+  // Mat<T> total_sources = join_cols(source_point_list,passive_source_list);
+
+  Mat<T> total_sources = (have_active_sources) ? join_cols(source_point_list,passive_source_list) : passive_source_list;
   
   Mat<T> exact_source_point_mat_stress(no_of_active_sources,3);
+
+  
   cout << "Black Sheep 7" << endl;
 #pragma omp parallel for 
   for (int i = 0; i < no_of_active_sources; ++i) {
@@ -793,5 +802,5 @@ Mat<complex<T>> get_strength_hetro(Mat<T> source_point_list,Mat<T> passive_sourc
 
 
 // Initializing The Template Class
-template Mat<complex<float>> get_strength_hetro(Mat<float>,Mat<float>,float,Row<float>,cx_3d<float>,float,float,float,float,float,float);
-template Mat<complex<double>> get_strength_hetro(Mat<double>,Mat<double>,double,Row<double>,cx_3d<double>,double,double,double,double,double,double);
+template Mat<complex<float>> get_strength_hetro(Mat<float>,Mat<float>,float,Row<float>,cx_3d<float>,float,float,float,float,float,float,bool);
+template Mat<complex<double>> get_strength_hetro(Mat<double>,Mat<double>,double,Row<double>,cx_3d<double>,double,double,double,double,double,double,bool);

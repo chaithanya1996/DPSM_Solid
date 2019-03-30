@@ -72,14 +72,18 @@ int main(){
   P_DTYPE c_w = 340;
   P_DTYPE c_al = 1.48 * km;
   // P-Wave Speed
-  P_DTYPE  c_al_pwave = 6.5 * km;
+  P_DTYPE  c_al_pwave = 6.42 * km;
   // S-Wave Speed
-  P_DTYPE  c_al_swave = 3.13 * km;
+  P_DTYPE  c_al_swave = 3.04 * km;
+  // P-Wave Speed
+  P_DTYPE  c_st_pwave = 5.80 * km;
+  // S-Wave Speed
+  P_DTYPE  c_st_swave = 3.10 * km;
   
   // Density of Water
   P_DTYPE rho_w = 1 * gms / cubic_centimeter;
   P_DTYPE rho_al = 2.7 ;
-
+  P_DTYPE rho_st = 7.90;
   // Aluminium Properties
   // double nu_al = 0.349;
   // double ral_al_crit_angle = 30.4196 * M_PI / 180 ;
@@ -97,7 +101,7 @@ int main(){
    ----------------------------------*/
 
     // Transducer Properties
-  P_DTYPE trans_freq = 200 * kHz;
+  P_DTYPE trans_freq = 50 * kHz;
   P_DTYPE omega_trans = 2 * M_PI * trans_freq ;
   P_DTYPE Transducer_diameter = 20 * mm ;
 
@@ -106,9 +110,12 @@ int main(){
   P_DTYPE k_s_aluminium = c_al_swave / omega_trans ;
   P_DTYPE k_p_aluminium = c_al_pwave / omega_trans ;
 
-  // calculating the r_s for given Transducer and Medium 
+  P_DTYPE k_s_steel = c_st_swave / omega_trans ;
+  P_DTYPE k_p_steel = c_st_pwave / omega_trans ;
 
-  P_DTYPE r_s_tran = r_s_calculator<P_DTYPE>(trans_freq,c_al);
+  // calculating the r_s for given Transducer and Medium 
+  int r_s_trans_factor = 2;
+  P_DTYPE r_s_tran = r_s_calculator<P_DTYPE>(trans_freq,c_al,r_s_trans_factor);
   //P_DTYPE r_s_tran = 0.0002;
   cout << " The Distance Between Transducer Source Points --" << r_s_tran << endl; 
   
@@ -129,13 +136,13 @@ int main(){
   //  // Cicular Source Generration
   // Mat<P_DTYPE> source_point_locations = rectangle_generator<P_DTYPE>(source_x,source_y,source_origin,source_x_div,source_y_div);
 
-  Row<P_DTYPE> source_st = {0,-0.2,0};
-  Row<P_DTYPE> source_end = {0,0.2,0};
+  Row<P_DTYPE> source_st = {0,-0.3,0};
+  Row<P_DTYPE> source_end = {0,0.3,0};
   int source_divs = vec_mag<P_DTYPE>(source_st - source_end)/r_s_tran;
   cout << "No of Sources" <<  source_divs << endl;
   Mat<P_DTYPE> source_point_locations = line_generator<P_DTYPE>(source_st,source_end,source_divs-1);
   
-  
+  source_point_locations.save("source_locations.csv",csv_ascii);
   /* Design Of Experiment 
      Phase - 1 : Apply Boundary Condiitons and Accuire Stregnth of sources determined
      Phase - 2 : Get Actual Strengths as an image
@@ -190,8 +197,8 @@ int main(){
   // int  al_st_y_div = int(vec_mag<P_DTYPE>(al_st_interface_y) / r_s_tran) ;
   // Mat<P_DTYPE> al_st_interface = rectangle_generator<P_DTYPE>(al_st_interface_x,al_st_interface_y,al_st_interface_origin,al_st_x_div,al_st_y_div);
 
-  Row<P_DTYPE> al_st_int_st = {0.05,-0.2,0};
-  Row<P_DTYPE> al_st_int_end = {0.05,0.2,0};
+  Row<P_DTYPE> al_st_int_st = {0.05,-0.1,0};
+  Row<P_DTYPE> al_st_int_end = {0.05,0.1,0};
   int al_st_divs = vec_mag<P_DTYPE>(al_st_int_st - al_st_int_end)/r_s_tran;
   Mat<P_DTYPE> al_st_interface = line_generator<P_DTYPE>(source_st,source_end,al_st_divs-1);
   
@@ -210,8 +217,8 @@ int main(){
   // int  st_end_y_div = int(vec_mag<P_DTYPE>(st_end_interface_y) / r_s_tran) ;
   // Mat<P_DTYPE> st_end_interface = rectangle_generator<P_DTYPE>(st_end_interface_x,st_end_interface_y,st_end_interface_origin,st_end_x_div,st_end_y_div);
 
-  Row<P_DTYPE> st_end_int_st = {0.1,-0.2,0};
-  Row<P_DTYPE> st_end_int_end = {0.1,0.2,0};
+  Row<P_DTYPE> st_end_int_st = {0.1,-0.1,0};
+  Row<P_DTYPE> st_end_int_end = {0.1,0.1,0};
   int st_end_divs = vec_mag<P_DTYPE>(al_st_int_st - al_st_int_end)/r_s_tran;
   Mat<P_DTYPE> st_end_interface = line_generator<P_DTYPE>(source_st,source_end,st_end_divs-1);
   
@@ -276,7 +283,7 @@ int main(){
   
   cx_3d<P_DTYPE> Transducer_stress_Cx_3d(source_point_locations.n_rows,Mat<complex<P_DTYPE>>(3,3,fill::zeros));
   for (int i= 0; i < source_point_locations.n_rows; ++i) {
-    Transducer_stress_Cx_3d[i](0,0) = 1 * pow(10,8); 
+    Transducer_stress_Cx_3d[i](0,0) = 1 * pow(10,9); 
   }
   //cout <<  Transducer_stress_Cx_3d.size() << endl;
   // Path - /home/chaithanya/Documents/DPSM/Package/Results
@@ -292,28 +299,20 @@ int main(){
   // cout << normal_to_location << endl;
   // cout << Transducer_stress_Cx_3d.size()  << endl;
   // cout << T_lam_ply_vec[0].active_sources.n_rows << endl;
-  Mat<complex<P_DTYPE>>  Result = get_strength_hetro(T_lam_ply_vec[0].active_sources, T_lam_ply_vec[0].passve_sources,r_s_tran,normal_to_location,Transducer_stress_Cx_3d,k_s_aluminium,k_p_aluminium,rho_al,omega_trans,mu_al,lamda_al);
+  Mat<complex<P_DTYPE>>  Result = get_strength_hetro(T_lam_ply_vec[0].active_sources, T_lam_ply_vec[0].passve_sources,r_s_tran,normal_to_location,Transducer_stress_Cx_3d,k_s_aluminium,k_p_aluminium,rho_al,omega_trans,mu_al,lamda_al,true);
 
-   cout << "Black sheep 11" << endl ;
   // cx_3d<double> Stress_resultants_Result =stress_from_points(T_lam_ply_vec[0].active_sources, Result, observation_target,k_s_aluminium,k_p_aluminium,rho_al,omega_trans,lamda_al,mu_al);
   // cout << "Black sheep 12" << endl ;
 
-
-  Result.save("point_strength.dat",csv_ascii);
-
-
+  Result.save("1st_ply_point_strength.csv",csv_ascii);
   std::string PATH_TO_SAVE_RESULTS = "/home/chaithanya/Documents/DPSM_Solid/Results/";
-
- 
-  // int Sucess = save_cx_3d(Stress_resultants_Result,PATH_TO_SAVE_RESULTS);
-
   
   /* -----------------------------------------------------
 
      ------------------------------------------------------ */
   cx_3d<P_DTYPE> sigma_resultant_interface =stress_from_points<P_DTYPE>(T_lam_ply_vec[0].active_sources, Result, al_st_interface ,k_s_aluminium,k_p_aluminium,rho_al,omega_trans,lamda_al,mu_al);
 
-   cout << "Black sheep 12" << endl ;
+   cout << "Calculated the Stress At the Interface" << endl ;
  
    // cout << T_lam_ply_vec[1].active_sources.n_rows << endl;
    // cout << "Black sheep 13" << endl ;
@@ -325,7 +324,7 @@ int main(){
    // cout << "-------------------------------" << endl;
    Row<P_DTYPE> dummmy_normal = {-1,0,0};
    int Sucess = save_cx_3d<complex<P_DTYPE>>(sigma_resultant_interface,PATH_TO_SAVE_RESULTS);
-   Mat<complex<P_DTYPE>> Result_2 = get_strength_hetro(al_st_interface, T_lam_ply_vec[1].passve_sources,r_s_tran,dummmy_normal,sigma_resultant_interface,k_s_aluminium,k_p_aluminium,rho_al,omega_trans,mu_al,lamda_al);
-   
+   Mat<complex<P_DTYPE>> Result_2 = get_strength_hetro(al_st_interface, T_lam_ply_vec[1].passve_sources,r_s_tran,dummmy_normal,sigma_resultant_interface,k_s_steel,k_p_steel,rho_st,omega_trans,mu_st,lamda_st,false);
+   Result_2.save("2nd_ply_point_strength.csv",csv_ascii);
   return(0);
 }
