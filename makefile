@@ -14,4 +14,4 @@ interface.o: dpsm_interface.cpp dpsm_interface.hpp
 	$(CC) -c dpsm_interface.cpp dpsm_helpers.o dpsm_core.o -o dpsm_interface.o $(CFLAGS)
 clean:
 	rm *.o
-
+	rm *.csv

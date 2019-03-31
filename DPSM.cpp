@@ -200,7 +200,7 @@ int main(){
   Row<P_DTYPE> al_st_int_st = {0.05,-0.1,0};
   Row<P_DTYPE> al_st_int_end = {0.05,0.1,0};
   int al_st_divs = vec_mag<P_DTYPE>(al_st_int_st - al_st_int_end)/r_s_tran;
-  Mat<P_DTYPE> al_st_interface = line_generator<P_DTYPE>(source_st,source_end,al_st_divs-1);
+  Mat<P_DTYPE> al_st_interface = line_generator<P_DTYPE>(al_st_int_st,al_st_int_end,al_st_divs-1);
   
   al_st_interface.save("al_st_interface.csv",csv_ascii);
 
@@ -220,7 +220,7 @@ int main(){
   Row<P_DTYPE> st_end_int_st = {0.1,-0.1,0};
   Row<P_DTYPE> st_end_int_end = {0.1,0.1,0};
   int st_end_divs = vec_mag<P_DTYPE>(al_st_int_st - al_st_int_end)/r_s_tran;
-  Mat<P_DTYPE> st_end_interface = line_generator<P_DTYPE>(source_st,source_end,st_end_divs-1);
+  Mat<P_DTYPE> st_end_interface = line_generator<P_DTYPE>(st_end_int_st,st_end_int_end,st_end_divs-1);
   
   st_end_interface.save("st_end_interface.csv",csv_ascii); 
   // List of Interfaces Used in secondary Ply
@@ -255,6 +255,7 @@ int main(){
   
   Interface_array_exp[0] = interface_al;
   Interface_array_exp[1] = combine_interface<P_DTYPE>(interface_al_st,interface_st_end);
+  Interface_array_exp[1].interface_source_1.save("D_BUG_PASSIVE_CREATION.csv",csv_ascii);
   
   // Assginig the Transducer
   // We simply leavbe the other as blank in the array thus we nly define one transducer 
@@ -324,6 +325,9 @@ int main(){
    // cout << "-------------------------------" << endl;
    Row<P_DTYPE> dummmy_normal = {-1,0,0};
    int Sucess = save_cx_3d<complex<P_DTYPE>>(sigma_resultant_interface,PATH_TO_SAVE_RESULTS);
+
+   T_lam_ply_vec[1].passve_sources.save("D_BUG_PASS_PASSIVE.csv",csv_ascii);
+   al_st_interface.save("D_BUG_PASS_active.csv",csv_ascii);
    Mat<complex<P_DTYPE>> Result_2 = get_strength_hetro(al_st_interface, T_lam_ply_vec[1].passve_sources,r_s_tran,dummmy_normal,sigma_resultant_interface,k_s_steel,k_p_steel,rho_st,omega_trans,mu_st,lamda_st,false);
    Result_2.save("2nd_ply_point_strength.csv",csv_ascii);
   return(0);

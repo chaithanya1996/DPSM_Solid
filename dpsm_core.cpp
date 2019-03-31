@@ -651,6 +651,14 @@ Col<complex<T>> source_strength_derivation(cx_5d<T> G_ijk_cube_of_sources,cx_3d<
   int source_no = G_ijk_cube_of_sources.size() ;
   int target_no =  G_ijk_cube_of_sources[0].size();
 
+  for (int i = 0; i < source_no; ++i) {
+    for (int j = 0; j <  target_no; ++j) {
+      if (G_ijk_cube_of_sources[i][j].has_nan()) {
+	cout << "NaN Detected" << "SOURCE --" << i << " Target--" << j << endl;
+     } 
+    }
+  }
+  cout << "Nan Detection Complete" << endl;
   
   Cube<complex<T>> G_full(target_no * 3,sources_len * 3,3,fill::zeros);
 
@@ -769,13 +777,19 @@ Mat<complex<T>> get_strength_hetro(Mat<T> source_point_list,Mat<T> passive_sourc
     exact_source_point_mat_stress.row(i) = source_point_list.row(i)  + direction_cosine * r_s ;
   }
 
+  
    // cout << source_point_list << endl;
    // cout << "-------------------------------" << endl;
    
    // cout << passive_source_list << endl;
    // cout << "-------------------------------" << endl;
    
-  cout << "Black Sheep 8" << endl;
+  cout << "Printing INPUT" << endl;
+  if (!have_active_sources) {
+    total_sources.save("D_BUG_TOATL_SOURCES.csv",csv_ascii);
+    exact_source_point_mat_stress.save("D_BUG_Exact_SOURCES.csv",csv_ascii);
+  }
+  
   cx_5d<T> G_matrix_calculations(total_sources.n_rows,cx_4d<T>(no_of_active_sources ,Cube<complex<T>>(3,3,3,fill::zeros)));
 #pragma omp parallel for 
   for(int i = 0; i < total_sources.n_rows; ++i){
@@ -788,6 +802,7 @@ Mat<complex<T>> get_strength_hetro(Mat<T> source_point_list,Mat<T> passive_sourc
   cout << "Starting Solving Linear Equations" << endl;
   Col<complex<T>> solid_point_strength_colvec = source_strength_derivation(G_matrix_calculations,stress_matrix);
   cout << "Completed Solving Linear Equations" << endl;
+  
   int out_mat_rows =  solid_point_strength_colvec.n_elem/3;
   Mat<complex<T>> P_mat_form(out_mat_rows,3,fill::zeros);
   

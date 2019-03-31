@@ -225,7 +225,7 @@ Mat<T> source_point_placer(Mat<T> source_location_mat, Row<T> normal_location, T
   Mat<T> displaced_sources(no_of_sources,3,fill::zeros);
 #pragma omp parallel for
   for (size_t i = 0; i < no_of_sources; ++i) { // openMP is Crying if we compare the double and int in a loop so keep that in mind
-   displaced_sources.row(i) = source_location_mat.row(i) - radiii * normal_location;
+   displaced_sources.row(i) = source_location_mat.row(i) + radiii * normal_location;
   }
   
   return(displaced_sources);
