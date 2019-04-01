@@ -101,7 +101,7 @@ int main(){
    ----------------------------------*/
 
     // Transducer Properties
-  P_DTYPE trans_freq = 50 * kHz;
+  P_DTYPE trans_freq =   25 * kHz;
   P_DTYPE omega_trans = 2 * M_PI * trans_freq ;
   P_DTYPE Transducer_diameter = 20 * mm ;
 
@@ -114,7 +114,7 @@ int main(){
   P_DTYPE k_p_steel = c_st_pwave / omega_trans ;
 
   // calculating the r_s for given Transducer and Medium 
-  int r_s_trans_factor = 2;
+  int r_s_trans_factor = 3;
   P_DTYPE r_s_tran = r_s_calculator<P_DTYPE>(trans_freq,c_al,r_s_trans_factor);
   //P_DTYPE r_s_tran = 0.0002;
   cout << " The Distance Between Transducer Source Points --" << r_s_tran << endl; 
@@ -136,8 +136,8 @@ int main(){
   //  // Cicular Source Generration
   // Mat<P_DTYPE> source_point_locations = rectangle_generator<P_DTYPE>(source_x,source_y,source_origin,source_x_div,source_y_div);
 
-  Row<P_DTYPE> source_st = {0,-0.3,0};
-  Row<P_DTYPE> source_end = {0,0.3,0};
+  Row<P_DTYPE> source_st = {0,-0.05,0};
+  Row<P_DTYPE> source_end = {0,0.05,0};
   int source_divs = vec_mag<P_DTYPE>(source_st - source_end)/r_s_tran;
   cout << "No of Sources" <<  source_divs << endl;
   Mat<P_DTYPE> source_point_locations = line_generator<P_DTYPE>(source_st,source_end,source_divs-1);
@@ -284,7 +284,7 @@ int main(){
   
   cx_3d<P_DTYPE> Transducer_stress_Cx_3d(source_point_locations.n_rows,Mat<complex<P_DTYPE>>(3,3,fill::zeros));
   for (int i= 0; i < source_point_locations.n_rows; ++i) {
-    Transducer_stress_Cx_3d[i](0,0) = 1 * pow(10,9); 
+    Transducer_stress_Cx_3d[i](0,0) = 1 * pow(10,6); 
   }
   //cout <<  Transducer_stress_Cx_3d.size() << endl;
   // Path - /home/chaithanya/Documents/DPSM/Package/Results

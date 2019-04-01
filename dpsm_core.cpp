@@ -643,7 +643,8 @@ template <typename T>
 Col<complex<T>> source_strength_derivation(cx_5d<T> G_ijk_cube_of_sources,cx_3d<T> stress_matrix){
   
   int sources_len = stress_matrix.size();
-  cout << " Source Strength Derivation No_of Source Supplied -" << sources_len << endl;
+  int cx_source = G_ijk_cube_of_sources.size();
+  cout << " Source Strength Derivation --"<< cx_source <<"No_of Source Supplied -" << sources_len << endl;
   // cx_mat str_mat(sources_len*stress_matrix[0].n_rows,stress_matrix[0].n_cols,fill::zeros);
   Col<complex<T>> str_mat(sources_len * stress_matrix[0].n_elem);
 
@@ -660,7 +661,7 @@ Col<complex<T>> source_strength_derivation(cx_5d<T> G_ijk_cube_of_sources,cx_3d<
   }
   cout << "Nan Detection Complete" << endl;
   
-  Cube<complex<T>> G_full(target_no * 3,sources_len * 3,3,fill::zeros);
+  Cube<complex<T>> G_full(target_no * 3,source_no * 3,3,fill::zeros);
 
   //std::cout << "Creating G_full" << endl;
   // std::cout << G_full << endl;
@@ -677,7 +678,7 @@ Col<complex<T>> source_strength_derivation(cx_5d<T> G_ijk_cube_of_sources,cx_3d<
 
 #pragma omp parallel for
   for(size_t j = 0; j < target_no; j++){ 
-    for(size_t i = 0; i < sources_len; i++){
+    for(size_t i = 0; i < source_no; i++){
       G_full(span(j*3,(j*3)+2),span(i*3,i*3+2),span(0,2)) =  G_ijk_cube_of_sources[i][j];
     }
   }
@@ -700,9 +701,15 @@ Col<complex<T>> source_strength_derivation(cx_5d<T> G_ijk_cube_of_sources,cx_3d<
 
   //std::cout << G_full_mat_form <<endl;
   cout << " Start_solving " << sources_len << endl;
+
+  
   G_full_mat_form.save("D_BUG_G_Full.csv",csv_ascii);
   str_mat.save("D_BUG_str_mat.csv",csv_ascii);
+
+  cout << "G_FULL ROWS --" << G_full_mat_form.n_rows << "Cols--" << G_full_mat_form.n_cols << endl;
   Col<complex<T>> col_one = solve(G_full_mat_form,str_mat);
+
+  
   cout << " End Solving -" << sources_len << endl;
   return(col_one);
 }
@@ -794,7 +801,7 @@ Mat<complex<T>> get_strength_hetro(Mat<T> source_point_list,Mat<T> passive_sourc
 #pragma omp parallel for 
   for(int i = 0; i < total_sources.n_rows; ++i){
     //std::cout << i << "\n";
-    G_matrix_calculations[i] =G_p_diff_ijk<T>(total_sources.row(i),exact_source_point_mat_stress,k_s,k_p,rho ,omega);
+    G_matrix_calculations[i] = G_p_diff_ijk<T>(total_sources.row(i),exact_source_point_mat_stress,k_s,k_p,rho ,omega);
   }
   
   G_matrix_calculations = stress_coff_calc<T>(G_matrix_calculations,mu,lamda);
