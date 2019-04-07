@@ -190,15 +190,12 @@ o---------------------------x
 
 template <typename T>
 Mat<T> rectangle_generator(Row<T> dir_vec_1, Row<T> dir_vec_2 , Row<T> origin , int x_div , int y_div){
-    cout << "----1------" << endl;
+
     Row<T> x_dir_rat =  dir_vec_1- origin ;
-    cout << "----2------" << endl;
     Row<T> x_dir_cos = x_dir_rat / (x_div-1);
-    cout << "----3------" << endl;
     Row<T> y_dir_rat = dir_vec_2 - origin ;
-    cout << "----4------" << endl;
     Row<T> y_dir_cos = y_dir_rat / (y_div-1);
-    cout << x_div << "========" << y_div << endl;
+    cout << "X Divisions--"<< x_div << "========" <<" Y Divisions--"<< y_div << endl;
     Mat<T> Rec_Point_Mat(x_div  * y_div ,3,fill::zeros);
 
     for(int i = 0;i < y_div; ++i){
@@ -287,3 +284,6 @@ template int save_cx_3d<complex<float>>(std::vector<Mat<complex<float>>>, const 
 template int save_cx_3d<cx_double>(std::vector<Mat<cx_double>>, const std::string &);
 template int save_cx_3d<double>(std::vector<Mat<double>>, const std::string &);
 template int save_cx_3d<float>(std::vector<Mat<float>>, const std::string &);
+
+
+

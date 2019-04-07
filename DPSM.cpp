@@ -197,8 +197,8 @@ int main(){
   // int  al_st_y_div = int(vec_mag<P_DTYPE>(al_st_interface_y) / r_s_tran) ;
   // Mat<P_DTYPE> al_st_interface = rectangle_generator<P_DTYPE>(al_st_interface_x,al_st_interface_y,al_st_interface_origin,al_st_x_div,al_st_y_div);
 
-  Row<P_DTYPE> al_st_int_st = {0.05,-0.1,0};
-  Row<P_DTYPE> al_st_int_end = {0.05,0.1,0};
+  Row<P_DTYPE> al_st_int_st = {0.05,-0.4,0};
+  Row<P_DTYPE> al_st_int_end = {0.05,0.4,0};
   int al_st_divs = vec_mag<P_DTYPE>(al_st_int_st - al_st_int_end)/r_s_tran;
   Mat<P_DTYPE> al_st_interface = line_generator<P_DTYPE>(al_st_int_st,al_st_int_end,al_st_divs-1);
   
@@ -217,8 +217,8 @@ int main(){
   // int  st_end_y_div = int(vec_mag<P_DTYPE>(st_end_interface_y) / r_s_tran) ;
   // Mat<P_DTYPE> st_end_interface = rectangle_generator<P_DTYPE>(st_end_interface_x,st_end_interface_y,st_end_interface_origin,st_end_x_div,st_end_y_div);
 
-  Row<P_DTYPE> st_end_int_st = {0.1,-0.1,0};
-  Row<P_DTYPE> st_end_int_end = {0.1,0.1,0};
+  Row<P_DTYPE> st_end_int_st = {0.1,-0.4,0};
+  Row<P_DTYPE> st_end_int_end = {0.1,0.4,0};
   int st_end_divs = vec_mag<P_DTYPE>(al_st_int_st - al_st_int_end)/r_s_tran;
   Mat<P_DTYPE> st_end_interface = line_generator<P_DTYPE>(st_end_int_st,st_end_int_end,st_end_divs-1);
   

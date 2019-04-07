@@ -826,3 +826,40 @@ Mat<complex<T>> get_strength_hetro(Mat<T> source_point_list,Mat<T> passive_sourc
 // Initializing The Template Class
 template Mat<complex<float>> get_strength_hetro(Mat<float>,Mat<float>,float,Row<float>,cx_3d<float>,float,float,float,float,float,float,bool);
 template Mat<complex<double>> get_strength_hetro(Mat<double>,Mat<double>,double,Row<double>,cx_3d<double>,double,double,double,double,double,double,bool);
+
+template <typename T>
+Mat<complex<T>> solve_dpsm_str (Mat<T> ACTIVE_SOURCES_DPSM_POINT, Mat<T> PASSIVE_SOURCES_DPSM_POINT, cx_3d<T> STRESS_CX_3D_MATRIX , Mat<T> Points_of_enforcement, T k_s,T k_p,T rho , T omega,T mu,T lamda){
+  
+  int total_source_no = ACTIVE_SOURCES_DPSM_POINT.n_rows + PASSIVE_SOURCES_DPSM_POINT.n_rows;
+  int no_points_enforce = Points_of_enforcement.n_rows;
+  
+  Mat<T> TOTAL_SOURCE_DPSM_MAT = join_cols(ACTIVE_SOURCES_DPSM_POINT,PASSIVE_SOURCES_DPSM_POINT);
+  
+  cx_5d<T> G_matrix(total_source_no,cx_4d<T>(no_points_enforce ,Cube<complex<T>>(3,3,3,fill::zeros)));
+#pragma omp parallel for 
+  for(int i = 0; i < total_source_no; ++i){
+    //std::cout << i << "\n";
+    G_matrix[i] = G_p_diff_ijk<T>(TOTAL_SOURCE_DPSM_MAT.row(i),Points_of_enforcement,k_s,k_p,rho ,omega);
+  }
+
+  G_matrix = stress_coff_calc<T>(G_matrix,mu,lamda);
+  
+  cout << "Starting Solving Linear Equations" << endl;
+  Col<complex<T>> solid_point_strength_colvec = source_strength_derivation(G_matrix,STRESS_CX_3D_MATRIX);
+  cout << "Completed Solving Linear Equations" << endl;
+
+  int out_mat_rows =  solid_point_strength_colvec.n_elem/3;
+  Mat<complex<T>> P_mat_form(out_mat_rows,3,fill::zeros);
+  
+  for(int i = 0;i<out_mat_rows;++i){
+    for( int j = 0; j < 3 ;++j){
+      P_mat_form(i,j) = solid_point_strength_colvec(i*3+j);
+    }
+  }
+  
+  return(P_mat_form);
+}
+
+template Mat<complex<float>> solve_dpsm_str (Mat<float>, Mat<float>, cx_3d<float>, Mat<float>, float,float,float,float,float,float);
+template Mat<complex<double>> solve_dpsm_str (Mat<double>, Mat<double>, cx_3d<double>, Mat<double>, double,double,double,double,double,double);
+

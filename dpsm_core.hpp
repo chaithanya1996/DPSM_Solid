@@ -116,3 +116,6 @@ Mat<complex<T>> get_strength(Mat<T> source_point_list,T r_s,Row<T> direction_cos
 
 template <typename T>
 Mat<complex<T>> get_strength_hetro(Mat<T> source_point_list,Mat<T> passive_source_list ,T r_s, Row<T> direction_cosine,cx_3d<T> stress_matrix,T k_s,T k_p,T rho , T omega,T mu,T lamda,bool have_active_sources);
+
+template <typename T>
+Mat<complex<T>> solve_dpsm_str (Mat<T> ACTIVE_SOURCES_DPSM_POINT, Mat<T> PASSIVE_SOURCES_DPSM_POINT, cx_3d<T> STRESS_CX_3D_MATRIX , Mat<T> Points_of_enforcement, T k_s,T k_p,T rho , T omega,T mu,T lamda);
