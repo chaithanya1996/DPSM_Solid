@@ -125,7 +125,7 @@ int main(){
    ----------------------------------*/
 
     // Transducer Properties
-  P_DTYPE trans_freq =   500 * kHz;
+  P_DTYPE trans_freq =  3000 * kHz;
   P_DTYPE omega_trans = 2 * M_PI * trans_freq ;
 
   // Transducer Properties in Aluminium
@@ -554,27 +554,28 @@ int main(){
   SURFACE_1_MAT = join_cols(SURFACE_1_MAT, S_1_TD_P3_MAT);
   SURFACE_1_MAT = join_cols(SURFACE_1_MAT, S_1_TD_P4_MAT);
 
-  SURFACE_1_MAT = join_cols(SURFACE_1_MAT, S_1_P1_MAT);
-  SURFACE_1_MAT = join_cols(SURFACE_1_MAT, S_1_P2_MAT);
-  SURFACE_1_MAT = join_cols(SURFACE_1_MAT, S_1_P3_MAT);
-  SURFACE_1_MAT = join_cols(SURFACE_1_MAT, S_1_P4_MAT);
+  
+  // SURFACE_1_MAT = join_cols(SURFACE_1_MAT, S_1_P1_MAT);
+  // SURFACE_1_MAT = join_cols(SURFACE_1_MAT, S_1_P2_MAT);
+  // SURFACE_1_MAT = join_cols(SURFACE_1_MAT, S_1_P3_MAT);
+  // SURFACE_1_MAT = join_cols(SURFACE_1_MAT, S_1_P4_MAT);
 
   /* Similarly For Surface 2 */
   SURFACE_2_MAT = join_cols(S_2_TD_P1_MAT, S_2_TD_P2_MAT);
   SURFACE_2_MAT = join_cols(SURFACE_2_MAT, S_2_TD_P3_MAT);
   SURFACE_2_MAT = join_cols(SURFACE_2_MAT, S_2_TD_P4_MAT);
 
-  SURFACE_2_MAT = join_cols(SURFACE_2_MAT, S_2_P1_MAT);
-  SURFACE_2_MAT = join_cols(SURFACE_2_MAT, S_2_P2_MAT);
-  SURFACE_2_MAT = join_cols(SURFACE_2_MAT, S_2_P3_MAT);
-  SURFACE_2_MAT = join_cols(SURFACE_2_MAT, S_2_P4_MAT);
+  // SURFACE_2_MAT = join_cols(SURFACE_2_MAT, S_2_P1_MAT);
+  // SURFACE_2_MAT = join_cols(SURFACE_2_MAT, S_2_P2_MAT);
+  // SURFACE_2_MAT = join_cols(SURFACE_2_MAT, S_2_P3_MAT);
+  // SURFACE_2_MAT = join_cols(SURFACE_2_MAT, S_2_P4_MAT);
  // Combining All the Surfaces
 
   ACTIVE_SOURCES = join_cols(SURFACE_1_MAT,SURFACE_2_MAT);
-  ACTIVE_SOURCES = join_cols(ACTIVE_SOURCES,SURFACE_3_MAT);
-  ACTIVE_SOURCES = join_cols(ACTIVE_SOURCES,SURFACE_4_MAT);
-  ACTIVE_SOURCES = join_cols(ACTIVE_SOURCES,SURFACE_5_MAT);
-  ACTIVE_SOURCES = join_cols(ACTIVE_SOURCES,SURFACE_6_MAT);
+  // ACTIVE_SOURCES = join_cols(ACTIVE_SOURCES,SURFACE_3_MAT);
+  // ACTIVE_SOURCES = join_cols(ACTIVE_SOURCES,SURFACE_4_MAT);
+  // ACTIVE_SOURCES = join_cols(ACTIVE_SOURCES,SURFACE_5_MAT);
+  // ACTIVE_SOURCES = join_cols(ACTIVE_SOURCES,SURFACE_6_MAT);
 
     /*Joining The Surface Parts of DPSM*/
   Row<P_DTYPE>S_1_normal = {0,0,1};
@@ -590,10 +591,10 @@ int main(){
   // Combining the DPSM
   
   ACTIVE_SOURCES_DPSM = join_cols(SURFACE_1_MAT_DPSM_SOURCE,SURFACE_2_MAT_DPSM_SOURCE);
-  ACTIVE_SOURCES_DPSM = join_cols(ACTIVE_SOURCES_DPSM,SURFACE_3_MAT_DPSM_SOURCE);
-  ACTIVE_SOURCES_DPSM = join_cols(ACTIVE_SOURCES_DPSM,SURFACE_4_MAT_DPSM_SOURCE);
-  ACTIVE_SOURCES_DPSM = join_cols(ACTIVE_SOURCES_DPSM,SURFACE_5_MAT_DPSM_SOURCE);
-  ACTIVE_SOURCES_DPSM = join_cols(ACTIVE_SOURCES_DPSM,SURFACE_6_MAT_DPSM_SOURCE);
+  // ACTIVE_SOURCES_DPSM = join_cols(ACTIVE_SOURCES_DPSM,SURFACE_3_MAT_DPSM_SOURCE);
+  // ACTIVE_SOURCES_DPSM = join_cols(ACTIVE_SOURCES_DPSM,SURFACE_4_MAT_DPSM_SOURCE);
+  // ACTIVE_SOURCES_DPSM = join_cols(ACTIVE_SOURCES_DPSM,SURFACE_5_MAT_DPSM_SOURCE);
+  // ACTIVE_SOURCES_DPSM = join_cols(ACTIVE_SOURCES_DPSM,SURFACE_6_MAT_DPSM_SOURCE);
 
   cout << " Joining the Stress Conditions" << endl;
 
@@ -607,10 +608,10 @@ int main(){
   SURFACE_1_STR_BC = join_cx_3d(SURFACE_1_STR_BC, S_1_TD_P3_BC);
   SURFACE_1_STR_BC = join_cx_3d(SURFACE_1_STR_BC, S_1_TD_P4_BC);
 
-  SURFACE_1_STR_BC = join_cx_3d(SURFACE_1_STR_BC, S_1_P1_BC);
-  SURFACE_1_STR_BC = join_cx_3d(SURFACE_1_STR_BC, S_1_P2_BC);
-  SURFACE_1_STR_BC = join_cx_3d(SURFACE_1_STR_BC, S_1_P3_BC);
-  SURFACE_1_STR_BC = join_cx_3d(SURFACE_1_STR_BC, S_1_P4_BC);
+  // SURFACE_1_STR_BC = join_cx_3d(SURFACE_1_STR_BC, S_1_P1_BC);
+  // SURFACE_1_STR_BC = join_cx_3d(SURFACE_1_STR_BC, S_1_P2_BC);
+  // SURFACE_1_STR_BC = join_cx_3d(SURFACE_1_STR_BC, S_1_P3_BC);
+  // SURFACE_1_STR_BC = join_cx_3d(SURFACE_1_STR_BC, S_1_P4_BC);
 
 
 
@@ -622,26 +623,26 @@ int main(){
   SURFACE_2_STR_BC = join_cx_3d(SURFACE_2_STR_BC, S_2_TD_P3_BC);
   SURFACE_2_STR_BC = join_cx_3d(SURFACE_2_STR_BC, S_2_TD_P4_BC);
 
-  SURFACE_2_STR_BC = join_cx_3d(SURFACE_2_STR_BC, S_2_P1_BC);
-  SURFACE_2_STR_BC = join_cx_3d(SURFACE_2_STR_BC, S_2_P2_BC);
-  SURFACE_2_STR_BC = join_cx_3d(SURFACE_2_STR_BC, S_2_P3_BC);
-  SURFACE_2_STR_BC = join_cx_3d(SURFACE_2_STR_BC, S_2_P4_BC);
+  // SURFACE_2_STR_BC = join_cx_3d(SURFACE_2_STR_BC, S_2_P1_BC);
+  // SURFACE_2_STR_BC = join_cx_3d(SURFACE_2_STR_BC, S_2_P2_BC);
+  // SURFACE_2_STR_BC = join_cx_3d(SURFACE_2_STR_BC, S_2_P3_BC);
+  // SURFACE_2_STR_BC = join_cx_3d(SURFACE_2_STR_BC, S_2_P4_BC);
 
   cx_3d<P_DTYPE> ACTIVE_STRESS_BC;
   ACTIVE_STRESS_BC = join_cx_3d<P_DTYPE>(SURFACE_1_STR_BC,SURFACE_2_STR_BC);
-  ACTIVE_STRESS_BC = join_cx_3d<P_DTYPE>(ACTIVE_STRESS_BC,SURFACE_3_STR_BC);
-  ACTIVE_STRESS_BC = join_cx_3d<P_DTYPE>(ACTIVE_STRESS_BC,SURFACE_4_STR_BC);
-  ACTIVE_STRESS_BC = join_cx_3d<P_DTYPE>(ACTIVE_STRESS_BC,SURFACE_5_STR_BC);
-  ACTIVE_STRESS_BC = join_cx_3d<P_DTYPE>(ACTIVE_STRESS_BC,SURFACE_6_STR_BC);
+  // ACTIVE_STRESS_BC = join_cx_3d<P_DTYPE>(ACTIVE_STRESS_BC,SURFACE_3_STR_BC);
+  // ACTIVE_STRESS_BC = join_cx_3d<P_DTYPE>(ACTIVE_STRESS_BC,SURFACE_4_STR_BC);
+  // ACTIVE_STRESS_BC = join_cx_3d<P_DTYPE>(ACTIVE_STRESS_BC,SURFACE_5_STR_BC);
+  // ACTIVE_STRESS_BC = join_cx_3d<P_DTYPE>(ACTIVE_STRESS_BC,SURFACE_6_STR_BC);
   
   // process_mem_usage(vm, rss);
   // cout << "VM: " << vm << "; RSS: " << rss << endl;
   // Mat<complex<P_DTYPE>> Result =  get_strength_hetro(Mat<T> source_point_list,Mat<T> passive_source_list ,T r_s, Row<T> direction_cosine,cx_3d<T> stress_matrix,T k_s,T k_p,T rho , T omega,T mu,T lamda,bool have_active_sources)
   ACTIVE_SOURCES.save("DBUG_TIME_ACTIVE.csv",csv_ascii);
   ACTIVE_SOURCES_DPSM.save("DBUG_TIME_ACTIVE_DPSM.csv",csv_ascii);
-
+  cout << ACTIVE_STRESS_BC.size() << "-------" << ACTIVE_SOURCES_DPSM.n_rows << endl;
   Mat<P_DTYPE> PASS_SOURCES(0,0,fill::zeros);
   
   Mat<complex<P_DTYPE>> Result =  solve_dpsm_str<P_DTYPE>(ACTIVE_SOURCES_DPSM,PASS_SOURCES,ACTIVE_STRESS_BC,ACTIVE_SOURCES,k_s_aluminium,k_p_aluminium,rho_al,omega_trans,mu_al,lamda_al);
-  
+  Result.save("D_BUG_Result.csv",csv_ascii);
  }
