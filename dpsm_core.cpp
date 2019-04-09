@@ -52,19 +52,26 @@ Row<complex<T>> G_ij(int i_sub, int j_sub, Row<T> affect_point , Row<T> source_p
   complex<T> r_p = img_start * k_p / radius_mag - 1/T(pow<T>(radius_mag,2));
   complex<T> r_s = img_start * k_s / radius_mag - 1/T(pow<T>(radius_mag,2));
 
+  //cout << "e_p--" << e_p << " e_s--" << e_s << " r_p--" << r_p << " r_s--" << r_s << endl;
+
   Row<T> R_vec(3,fill::zeros);
   for(size_t i = 0;i<3;++i){
     R_vec(i)= (affect_point(i) - source_point(i))/radius_mag;
   }
 
+  //cout << "R_vec--" << R_vec << endl;
+  
   // Calculating G_sub
 
   Row<complex<T>> G_point(2,fill::zeros);
-  
-  G_point(0) =( e_p *( T(pow<T>(k_p,2)) * R_vec(i_sub-1) *  R_vec(j_sub-1) + ( T (3) * R_vec(i_sub-1) *  R_vec(j_sub-1) -  kron_delta<T>(i_sub,j_sub) ) * r_p))/ T( 4 * M_PI *  rho * pow<T>(omega,2));
 
+  T multiplier =  4 * M_PI * rho * omega * omega;
   
-  G_point(1) =( e_s *( T(pow<T>(k_s,2)) * ( kron_delta<T>(i_sub,j_sub) -  R_vec(i_sub-1) *  R_vec(j_sub-1) ) - ( T (3) * R_vec(i_sub-1) *  R_vec(j_sub-1) -  kron_delta<T>(i_sub,j_sub) ) * r_s)) / T( 4 * M_PI *  rho * pow<T>(omega,2));
+  G_point(0) = e_p *( T(pow<T>(k_p,2)) * R_vec(i_sub-1) *  R_vec(j_sub-1) + ( T (3) * R_vec(i_sub-1) *  R_vec(j_sub-1) -  kron_delta<T>(i_sub,j_sub) ) * r_p);
+  
+  G_point(1) =e_s *( T(pow<T>(k_s,2)) * ( kron_delta<T>(i_sub,j_sub) -  R_vec(i_sub-1) *  R_vec(j_sub-1) ) - ( T (3) * R_vec(i_sub-1) *  R_vec(j_sub-1) -  kron_delta<T>(i_sub,j_sub)) * r_s);
+
+  G_point = G_point / multiplier;
 
   return(G_point);
 }
@@ -170,19 +177,20 @@ template complex<double> r_diff(double,double,double);
 
 // ----------------------------------------------------------------//
 
+
+
 template <typename T>
 Mat<complex<T>> r_diff_mat_gen(Row<T> affect_point , Row<T> source_point,T k_s , T k_p){
+  T radius_mag = vec_mag<T>(source_point - affect_point);
   Row<T> R_vec(3,fill::zeros);
+  
   for(int i = 0;i<3;++i){
-    R_vec(i)= affect_point(i) - source_point(i);
+    R_vec(i)= (affect_point(i) - source_point(i))/radius_mag;
   }
   Mat<complex<T>> r_diff_matrix(3,2,fill::zeros);
-
   // Now we are going to generate matrix in the same way formuals written in book
   // P - 1st column | S - Second Column
   // The rows are for the directional cosines
-
-  T radius_mag = vec_mag<T>(source_point - affect_point);
 
   for(int i = 0 ; i < 3 ; ++i){ // i is for rows in matrix
     for(int j = 0 ; j < 2 ; ++j){ // J is for columns in matrix
@@ -206,6 +214,7 @@ template Mat<complex<double>> r_diff_mat_gen(Row<double>,Row<double>,double, dou
 template <typename T>
 T eoiidi(T i_val ,Row<T> R_vector,T r_mag){
   T return_value =   - 2 * pow<T>(R_vector(i_val),3) / r_mag + 2 * R_vector(i_val) / r_mag;
+  //cout << "Triggered -- iii" << endl; 
   return(return_value);
 }
 
@@ -215,6 +224,7 @@ template double eoiidi(double ,Row<double>,double);
 template <typename T>
 T eoijdk(T i_val ,T j_val ,Row<T> R_vector,T r_mag){
   T return_value =   -2 * R_vector(0) * R_vector(1) * R_vector(2) / r_mag ;
+  //cout << "Triggered -- ijk" << endl;
   return(return_value);
 }
 
@@ -224,7 +234,8 @@ template double eoijdk(double ,double ,Row<double>,double);
 
 template <typename T>
 T eoiidj(T i_val ,T j_val ,Row<T> R_vector,T r_mag){
-  T return_value =   -2 * R_vector(0) * R_vector(0) * R_vector(2) / r_mag ;
+  T return_value =   -2 * R_vector(i_val) * R_vector(i_val) * R_vector(j_val) / r_mag ;
+  //cout << "Triggered -- iij -- i_val" << i_val << "  j_val--" << j_val<< endl;
   return(return_value);
 }
 
@@ -234,6 +245,7 @@ template double eoiidj(double ,double ,Row<double> ,double);
 template <typename T>
 T eoijdi(T i_val ,T j_val,Row<T> R_vector,T r_mag){
   T return_value =   - 2 * pow<T>(R_vector(i_val),2) * R_vector(j_val) / r_mag +  R_vector(j_val) / r_mag;
+  //cout << "Triggered -- iji -- i_val" << i_val << "  j_val--" << j_val  << endl;
   return(return_value);
 }
 
@@ -245,16 +257,24 @@ T eo_d_universal(Row<T> i_arr,Row<T> R_vec, T r_mag){
   T eo_val = 0;
   if(i_arr(0) == i_arr(1)){
     if(i_arr(1) == i_arr(2)){
+      //cout << "Triggering " << i_arr << endl;
       return(eoiidi<T>(i_arr(0),R_vec,r_mag));
     }
     else{
+      //cout << "Triggering " << i_arr << endl;
       return(eoiidj<T>(i_arr(0),i_arr(2),R_vec,r_mag));
     }
   }else{
+    if(i_arr(0) == i_arr(2)){
+      //cout << "Triggering " << i_arr << endl;
+      return(eoijdi<T>(i_arr(0),i_arr(1),R_vec,r_mag));
+    }
     if(i_arr(1) == i_arr(2)){
-      return(eoijdi<T>(i_arr(0),i_arr(2),R_vec,r_mag));
+      //cout << "Triggering " << i_arr << endl;
+      return(eoijdi<T>(i_arr(1),i_arr(0),R_vec,r_mag));
     }
     else{
+      //cout << "Triggering " << i_arr << endl;
       return(eoijdk<T>(i_arr(0),i_arr(2),R_vec,r_mag));
     }
   }
@@ -326,7 +346,7 @@ complex<T> G_p_ijk (Row<T> ijk_row_passed, Row<T> affect_point_this, Row<T> sour
   Row<T> R_vec(3,fill::zeros);
   
   for(size_t i = 0;i<3;++i){
-    R_vec(i)= affect_point_this(i) - source_point_this(i);
+    R_vec(i)= (affect_point_this(i) - source_point_this(i)) / radius_mag;
   }
   Row<T> ijk_row =  ijk_row_passed + 1; // For compatibility with the Lower level implementations in the Helper functions 
 
@@ -335,12 +355,13 @@ complex<T> G_p_ijk (Row<T> ijk_row_passed, Row<T> affect_point_this, Row<T> sour
   Row<complex<T>> G_place_holder =  G_ij<T>(ijk_row[0],ijk_row[1],affect_point_this,source_point_this,k_s ,k_p,rho ,omega);
   
   ijk_row =  ijk_row_passed ;
+  T multiplier = 4 * M_PI *  rho * pow<T>(omega,2); 
   complex<T> Gpiidi  = (e_p * ( pow<T>(k_p,2) *  eo_d_universal(ijk_row,R_vec,radius_mag) +
-	    ( G_ijk_helper(ijk_row) +3 * R_vec[ijk_row[0]] * R_vec[ijk_row[1]]) * R_differ_mat(ijk_row[2],0) +  r_p * T (3) * eo_d_universal(ijk_row,R_vec,radius_mag)))
-    / complex<T>( 4 * M_PI *  rho * pow<T>(omega,2)) +
-    G_place_holder[0] * (img_start * R_vec[ijk_row[2]] * e_p - R_vec[ijk_row[2]] * e_p / radius_mag);			 
+   ( G_ijk_helper(ijk_row) + 3 * R_vec[ijk_row[0]] * R_vec[ijk_row[1]]) * R_differ_mat(ijk_row[2],0) +  r_p * T (3) * eo_d_universal(ijk_row,R_vec,radius_mag)))/ multiplier +
+    G_place_holder[0] * (img_start * k_p * R_vec[ijk_row[2]] * e_p - R_vec[ijk_row[2]] * e_p / radius_mag);			 
 
-  complex<T> Gsiidi  = (e_s * ( -pow<T>(k_s,2) *  eo_d_universal(ijk_row,R_vec,radius_mag) -  ( G_ijk_helper(ijk_row) +3 * R_vec[ijk_row[0]] * R_vec[ijk_row[1]]) * R_differ_mat(ijk_row[2],0) +  r_s * T (3) * eo_d_universal(ijk_row,R_vec,radius_mag))) / complex<T>( 4 * M_PI *  rho * pow<T>(omega,2))+ G_place_holder[1] * (img_start * R_vec[ijk_row[2]] * e_s - R_vec[ijk_row[2]] * e_s / radius_mag);			 
+  complex<T> Gsiidi  = (e_s * ( -pow<T>(k_s,2) *  eo_d_universal(ijk_row,R_vec,radius_mag) -  ( G_ijk_helper(ijk_row) +3 * R_vec[ijk_row[0]] * R_vec[ijk_row[1]]) * R_differ_mat(ijk_row[2],0) +  r_s * T (3) * eo_d_universal(ijk_row,R_vec,radius_mag))) / multiplier +
+    G_place_holder[1] * (img_start * k_s * R_vec[ijk_row[2]] * e_s - R_vec[ijk_row[2]] * e_s / radius_mag);			 
   
   return Gpiidi + Gsiidi ;
 }
@@ -382,8 +403,29 @@ cx_4d<T> G_p_diff_ijk(Row<T> source_point_vector,Mat<T> observing_plane_cube,T k
 }
 
 template cx_4d<float> G_p_diff_ijk(Row<float>,Mat<float>,float,float,float, float);
-
 template cx_4d<double> G_p_diff_ijk(Row<double>,Mat<double>,double,double,double, double);
+
+
+template <typename T>
+Cube<complex<T>> G_diff_ijk_point(Row<T> source_point_row,Row<T> target_point_row,T k_s , T k_p,T rho , T omega){
+  
+  Cube<complex<T>> G_diff(3,3,3,fill::zeros);
+      // For Generating the Differential matrices
+      for (int k = 0; k < 3; ++k){
+        for (int l = 0; l < 3; ++l){
+          for (int m = 0; m < 3; ++m){
+            Row<T> ijk_row_gen_vector = {T(k),T(l),T(m)}; // Type Conversion into Appropiate Type for Templating the Operation
+            G_diff(k,l,m) =  G_p_ijk<T>(ijk_row_gen_vector, source_point_row,target_point_row,k_s,k_p,rho ,omega);
+          }
+        }
+      }
+      // End the Differenetial Loops
+      //std::cout << G_diff_5dcube[i][j] << endl ;
+  return G_diff;
+}
+
+
+
 
 
 template <typename T>
@@ -517,6 +559,13 @@ Cube<complex<T>> stress_coff_point(Cube<complex<T>> G_ijk,T lamda,T mu){
 
 template Cube<complex<float>> stress_coff_point(Cube<complex<float>>,float,float);
 template Cube<complex<double>> stress_coff_point(Cube<complex<double>>,double,double);
+
+template <typename T>
+Cube<complex<T>> S_coff_source_target (Row<T> source_point_row,Row<T> target_point_row,T k_s , T k_p,T rho , T omega,T lamda,T mu){
+  Cube<complex<T>> G = G_diff_ijk_point( source_point_row, target_point_row,k_s ,  k_p, rho ,  omega);
+  Cube<complex<T>> S_COFF = stress_coff_point(G,lamda,mu);
+  return S_COFF;
+}
 
 
 template <typename T>
@@ -862,4 +911,30 @@ Mat<complex<T>> solve_dpsm_str (Mat<T> ACTIVE_SOURCES_DPSM_POINT, Mat<T> PASSIVE
 
 template Mat<complex<float>> solve_dpsm_str (Mat<float>, Mat<float>, cx_3d<float>, Mat<float>, float,float,float,float,float,float);
 template Mat<complex<double>> solve_dpsm_str (Mat<double>, Mat<double>, cx_3d<double>, Mat<double>, double,double,double,double,double,double);
+
+template <typename T> Mat<complex<T>>
+EQN_ROW(const Mat<T> &ACTIVE_SOURCES_DPSM_POINT, Row<T> Points_of_enforcement,const T &k_s,const T &k_p,const T & rho , const T & omega,const T & mu,const T & lamda){
+  int no_active_points = ACTIVE_SOURCES_DPSM_POINT.n_rows;
+  Cube<complex<T>> S_Coff_for_target(3,3,3,fill::zeros);
+  Mat<complex<T>> EQN_MAT(9,no_active_points*3,fill::zeros);
+  for (int i= 0; i < no_active_points; ++i) {
+    Cube<complex<T>> G_Cube = S_coff_source_target (ACTIVE_SOURCES_DPSM_POINT.row(i), Points_of_enforcement, k_s ,  k_p, rho ,  omega, lamda, mu);
+    for (int j = 0; j < 3; j = j+3) {
+      EQN_MAT(span(j,j+2),span(i*3,i*3+2)) = G_Cube.slice(i);
+    }
+  }
+  return(EQN_MAT);
+}
+
+template <typename T>
+Mat<complex<T>> EQN_assembler (Mat<T> ACTIVE_SOURCES_DPSM_POINT, Mat<T> Points_of_enforcement, T k_s,T k_p,T rho , T omega,T mu,T lamda){
+  
+  int no_active_points = ACTIVE_SOURCES_DPSM_POINT.n_rows;
+  int no_target_points = Points_of_enforcement.n_rows;
+  Mat<complex<T>> A_COFF(no_target_points,no_active_points * 3,fill::zeros); 
+  for (int i = 0; i < no_target_points; ++i) {
+    A_COFF(span(i*9,i*9+8),span::all) = EQN_ROW(ACTIVE_SOURCES_DPSM_POINT,Points_of_enforcement.row(i),k_s,k_p, rho ,omega,mu, lamda);
+  }
+  return(A_COFF);
+}
 

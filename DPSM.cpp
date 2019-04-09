@@ -330,5 +330,7 @@ int main(){
    al_st_interface.save("D_BUG_PASS_active.csv",csv_ascii);
    Mat<complex<P_DTYPE>> Result_2 = get_strength_hetro(al_st_interface, T_lam_ply_vec[1].passve_sources,r_s_tran,dummmy_normal,sigma_resultant_interface,k_s_steel,k_p_steel,rho_st,omega_trans,mu_st,lamda_st,false);
    Result_2.save("2nd_ply_point_strength.csv",csv_ascii);
+
+   
   return(0);
 }

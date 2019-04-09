@@ -130,8 +130,9 @@ int main(){
 
   // Transducer Properties in Aluminium
 
-  P_DTYPE k_s_aluminium = c_al_swave / omega_trans ;
-  P_DTYPE k_p_aluminium = c_al_pwave / omega_trans ;
+  P_DTYPE k_s_aluminium = omega_trans / c_al_swave  ;
+  
+  P_DTYPE k_p_aluminium = omega_trans / c_al_pwave  ;
 
 
   // calculating the r_s for given Transducer and Medium 
@@ -645,4 +646,10 @@ int main(){
   
   Mat<complex<P_DTYPE>> Result =  solve_dpsm_str<P_DTYPE>(ACTIVE_SOURCES_DPSM,PASS_SOURCES,ACTIVE_STRESS_BC,ACTIVE_SOURCES,k_s_aluminium,k_p_aluminium,rho_al,omega_trans,mu_al,lamda_al);
   Result.save("D_BUG_Result.csv",csv_ascii);
+
+  Mat<P_DTYPE> Observation_point = {{10*cm,10*cm,0},{5*cm,5*cm,0}};
+
+  cx_3d<P_DTYPE> DBUG_Stress_Result = stress_from_points<P_DTYPE>(ACTIVE_SOURCES_DPSM ,Result , Observation_point ,k_s_aluminium,k_p_aluminium,rho_al,omega_trans,lamda_al,mu_al);
+  int Sucess = save_cx_3d<complex<P_DTYPE>>(DBUG_Stress_Result,"./");
+  cout << "Sucess Reading " << endl;	
  }
