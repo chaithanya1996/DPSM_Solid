@@ -143,7 +143,8 @@ int main(){
 
   Row<P_DTYPE> source_point = {1,1,1};
   Row<P_DTYPE> target_point = {2,2,2};
-  Mat<P_DTYPE> Target_plane = {{2,2,2}};
+  Mat<P_DTYPE> Source_Mat = {{0,0,0},{0,0,15}};
+  Mat<P_DTYPE> Target_plane = {{1,1,1},{2,2,2}};
 
   // complex<P_DTYPE> img_start(0,1.0);
   // complex<P_DTYPE> e_p = exp(img_start * k_p_aluminium * vec_mag<P_DTYPE>(target_point-source_point))/vec_mag<P_DTYPE>(target_point-source_point);
@@ -158,6 +159,7 @@ int main(){
   // cout << exp(img_start) << endl;
   // cout << K << endl;
 
-  cx_4d<P_DTYPE> Result = G_p_diff_ijk(source_point,Target_plane,k_s_aluminium ,k_p_aluminium,rho_al ,omega_trans);
-  cout << Result[0] << endl;
+  //cx_4d<P_DTYPE> Result = G_p_diff_ijk(source_point,Target_plane,k_s_aluminium ,k_p_aluminium,rho_al ,omega_trans);
+  Mat<complex<P_DTYPE>> Result = EQN_assembler(Source_Mat,Target_plane ,k_s_aluminium ,k_p_aluminium,rho_al ,omega_trans,mu_al,lamda_al);
+  cout << Result << endl;
  }

@@ -642,14 +642,14 @@ int main(){
   ACTIVE_SOURCES.save("DBUG_TIME_ACTIVE.csv",csv_ascii);
   ACTIVE_SOURCES_DPSM.save("DBUG_TIME_ACTIVE_DPSM.csv",csv_ascii);
   cout << ACTIVE_STRESS_BC.size() << "-------" << ACTIVE_SOURCES_DPSM.n_rows << endl;
-  Mat<P_DTYPE> PASS_SOURCES(0,0,fill::zeros);
+  // Mat<P_DTYPE> PASS_SOURCES(0,0,fill::zeros);
   
-  Mat<complex<P_DTYPE>> Result =  solve_dpsm_str<P_DTYPE>(ACTIVE_SOURCES_DPSM,PASS_SOURCES,ACTIVE_STRESS_BC,ACTIVE_SOURCES,k_s_aluminium,k_p_aluminium,rho_al,omega_trans,mu_al,lamda_al);
-  Result.save("D_BUG_Result.csv",csv_ascii);
+  // Mat<complex<P_DTYPE>> Result =  solve_dpsm_str<P_DTYPE>(ACTIVE_SOURCES_DPSM,PASS_SOURCES,ACTIVE_STRESS_BC,ACTIVE_SOURCES,k_s_aluminium,k_p_aluminium,rho_al,omega_trans,mu_al,lamda_al);
+  // Result.save("D_BUG_Result.csv",csv_ascii);
 
-  Mat<P_DTYPE> Observation_point = {{10*cm,10*cm,0},{5*cm,5*cm,0}};
+  // Mat<P_DTYPE> Observation_point = {{10*cm,10*cm,0},{5*cm,5*cm,0}};
 
-  cx_3d<P_DTYPE> DBUG_Stress_Result = stress_from_points<P_DTYPE>(ACTIVE_SOURCES_DPSM ,Result , Observation_point ,k_s_aluminium,k_p_aluminium,rho_al,omega_trans,lamda_al,mu_al);
-  int Sucess = save_cx_3d<complex<P_DTYPE>>(DBUG_Stress_Result,"./");
+  // cx_3d<P_DTYPE> DBUG_Stress_Result = stress_from_points<P_DTYPE>(ACTIVE_SOURCES_DPSM ,Result , Observation_point ,k_s_aluminium,k_p_aluminium,rho_al,omega_trans,lamda_al,mu_al);
+  // int Sucess = save_cx_3d<complex<P_DTYPE>>(DBUG_Stress_Result,"./");
   cout << "Sucess Reading " << endl;	
  }

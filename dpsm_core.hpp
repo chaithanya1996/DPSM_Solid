@@ -66,11 +66,11 @@ T G_ijk_helper(Row<T> ijk_thing);
 template <typename T> 
 complex<T> G_p_ijk (Row<T> ijk_row_passed, Row<T> affect_point, Row<T> source_point,T k_s , T k_p,T rho , T omega);
 
-template <typename T>
-cx_4d<T> G_p_diff_ijk(Row<T> source_point_vector,Mat<T> observing_plane_cube,T k_s , T k_p,T rho , T omega);
+// template <typename T>
+// cx_4d<T> G_p_diff_ijk(Row<T> source_point_vector,Mat<T> observing_plane_cube,T k_s , T k_p,T rho , T omega);
 
-template <typename T>
-cx_5d<T> G_ijk_full_matrix(Mat<T> source_point_mat,Mat<T> target_point_mat,T k_s , T k_p,T rho ,T omega);
+// template <typename T>
+// cx_5d<T> G_ijk_full_matrix(Mat<T> source_point_mat,Mat<T> target_point_mat,T k_s , T k_p,T rho ,T omega);
 
   
 // ------------------------------------------------------------------//
@@ -78,44 +78,53 @@ cx_5d<T> G_ijk_full_matrix(Mat<T> source_point_mat,Mat<T> target_point_mat,T k_s
 // ----------------------------------------------------------------//
 
 
-template <typename T>
-cx_3d<T> strain_cal_for_one_source(cx_4d<T> G_ijk_cube, Row<complex<T>> strength_cube);
+// template <typename T>
+// cx_3d<T> strain_cal_for_one_source(cx_4d<T> G_ijk_cube, Row<complex<T>> strength_cube);
 
-template <typename T>
-cx_3d<T> strain_cal(cx_5d<T> G_ijk_source,Mat<complex<T>> src_str);
+// template <typename T>
+// cx_3d<T> strain_cal(cx_5d<T> G_ijk_source,Mat<complex<T>> src_str);
 
 // ------------------------------------------------------------------//
 // -----------------Stress Calculation Procedure---------------------//
 // ----------------------------------------------------------------//
 
-template<typename T>
-Cube<T> transpose_cube_in_dir_2(Cube<T> cube_to_trans);
+// template<typename T>
+// Cube<T> transpose_cube_in_dir_2(Cube<T> cube_to_trans);
   
 template <typename T>
 Cube<T> stress_coff_point(Cube<T> G_ijk,T lamda,T mu);
 
 template <typename T>
-cx_5d<T> stress_coff_calc(const cx_5d<T> G_ijk_source,T lamda,T mu);
+Cube<complex<T>> S_coff_source_target (Row<T> source_point_row,Row<T> target_point_row,T k_s , T k_p,T rho , T omega,T lamda,T mu);
+
+// template <typename T>
+// cx_5d<T> stress_coff_calc(const cx_5d<T> G_ijk_source,T lamda,T mu);
+
+// template <typename T>
+// cx_3d<T> stress_cal_one_source(cx_4d<T> G_ijk_cube, Row<complex<T>> strength_cube);
+
+// template <typename T>
+// cx_3d<T> stress_cal(const cx_5d<T> G_ijk_source,Mat<complex<T>> src_str,T lamda,T mu);
+
+
+// template <typename T>
+// cx_3d<T> stress_from_points(Mat<T> source_points, Mat<complex<T>> src_str, Mat<T> target_points,T k_s , T k_p,T rho ,T omega , T lamda,T mu);
+
+// template <typename T>
+// Col<complex<T>> source_strength_derivation(cx_5d<T> G_ijk_cube_of_sources,cx_3d<T> stress_matrix);
+
+
+// template<typename T>
+// Mat<complex<T>> get_strength(Mat<T> source_point_list,T r_s,Row<T> direction_cosine,cx_3d<T> stress_matrix,T k_s,T k_p,T rho , T omega);
+
+// template <typename T>
+// Mat<complex<T>> get_strength_hetro(Mat<T> source_point_list,Mat<T> passive_source_list ,T r_s, Row<T> direction_cosine,cx_3d<T> stress_matrix,T k_s,T k_p,T rho , T omega,T mu,T lamda,bool have_active_sources);
+
+// template <typename T>
+// Mat<complex<T>> solve_dpsm_str (Mat<T> ACTIVE_SOURCES_DPSM_POINT, Mat<T> PASSIVE_SOURCES_DPSM_POINT, cx_3d<T> STRESS_CX_3D_MATRIX , Mat<T> Points_of_enforcement, T k_s,T k_p,T rho , T omega,T mu,T lamda);
+
+template <typename T> Mat<complex<T>>
+EQN_ROW(const Mat<T> &ACTIVE_SOURCES_DPSM_POINT, Row<T> Points_of_enforcement,const T &k_s,const T &k_p,const T & rho , const T & omega,const T & mu,const T & lamda);
 
 template <typename T>
-cx_3d<T> stress_cal_one_source(cx_4d<T> G_ijk_cube, Row<complex<T>> strength_cube);
-
-template <typename T>
-cx_3d<T> stress_cal(const cx_5d<T> G_ijk_source,Mat<complex<T>> src_str,T lamda,T mu);
-
-
-template <typename T>
-cx_3d<T> stress_from_points(Mat<T> source_points, Mat<complex<T>> src_str, Mat<T> target_points,T k_s , T k_p,T rho ,T omega , T lamda,T mu);
-
-template <typename T>
-Col<complex<T>> source_strength_derivation(cx_5d<T> G_ijk_cube_of_sources,cx_3d<T> stress_matrix);
-
-
-template<typename T>
-Mat<complex<T>> get_strength(Mat<T> source_point_list,T r_s,Row<T> direction_cosine,cx_3d<T> stress_matrix,T k_s,T k_p,T rho , T omega);
-
-template <typename T>
-Mat<complex<T>> get_strength_hetro(Mat<T> source_point_list,Mat<T> passive_source_list ,T r_s, Row<T> direction_cosine,cx_3d<T> stress_matrix,T k_s,T k_p,T rho , T omega,T mu,T lamda,bool have_active_sources);
-
-template <typename T>
-Mat<complex<T>> solve_dpsm_str (Mat<T> ACTIVE_SOURCES_DPSM_POINT, Mat<T> PASSIVE_SOURCES_DPSM_POINT, cx_3d<T> STRESS_CX_3D_MATRIX , Mat<T> Points_of_enforcement, T k_s,T k_p,T rho , T omega,T mu,T lamda);
+Mat<complex<T>> EQN_assembler (Mat<T> ACTIVE_SOURCES_DPSM_POINT, Mat<T> Points_of_enforcement, T k_s,T k_p,T rho , T omega,T mu,T lamda);
