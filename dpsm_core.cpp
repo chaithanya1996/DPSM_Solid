@@ -915,7 +915,7 @@ std::vector<cx_double> conv_observing_plane_mat_to_vector(cx_mat Observing_plane
 // template Mat<complex<double>> solve_dpsm_str (Mat<double>, Mat<double>, cx_3d<double>, Mat<double>, double,double,double,double,double,double);
 
 template <typename T> Mat<complex<T>>
-EQN_ROW(const Mat<T> &ACTIVE_SOURCES_DPSM_POINT, Row<T> Points_of_enforcement,const T &k_s,const T &k_p,const T & rho , const T & omega,const T & mu,const T & lamda){
+EQN_ROW(const Mat<T> &ACTIVE_SOURCES_DPSM_POINT, Row<T> Points_of_enforcement, T k_s, T k_p,T rho , T omega, T mu,T lamda){
   int no_active_points = ACTIVE_SOURCES_DPSM_POINT.n_rows;
   Cube<complex<T>> S_Coff_for_target(3,3,3,fill::zeros);
   Mat<complex<T>> EQN_MAT(9,no_active_points*3,fill::zeros);
@@ -928,20 +928,63 @@ EQN_ROW(const Mat<T> &ACTIVE_SOURCES_DPSM_POINT, Row<T> Points_of_enforcement,co
   return(EQN_MAT);
 }
 
-template Mat<complex<double>> EQN_ROW(const Mat<double> &, Row<double>,const double &,const double &,const double &, const double &,const double & ,const double &);
-template Mat<complex<float>> EQN_ROW(const Mat<float> &, Row<float>,const float &,const float &,const float &, const float &,const float & ,const float &);
+template Mat<complex<double>> EQN_ROW( const Mat<double> & , Row<double>,  double ,  double ,  double ,   double ,  double   ,  double  );
+template Mat<complex<float>> EQN_ROW( const Mat<float> & , Row<float>,  float  ,  float  ,  float  ,   float  ,  float   ,  float  );
   
 template <typename T>
-Mat<complex<T>> EQN_assembler (Mat<T> ACTIVE_SOURCES_DPSM_POINT, Mat<T> Points_of_enforcement, T k_s,T k_p,T rho , T omega,T mu,T lamda){
+Mat<complex<T>> EQN_assembler (const Mat<T> &ACTIVE_SOURCES_DPSM_POINT, const Mat<T> &Points_of_enforcement, T k_s,T k_p,T rho , T omega,T mu,T lamda){
   
   int no_active_points = ACTIVE_SOURCES_DPSM_POINT.n_rows;
   int no_target_points = Points_of_enforcement.n_rows;
-  Mat<complex<T>> A_COFF(no_target_points*9,no_active_points * 3,fill::zeros); 
+  Mat<complex<T>> A_COFF(no_target_points*9,no_active_points * 3,fill::zeros);
+  #pragma omp parallel for
   for (int i = 0; i < no_target_points; ++i) {
     A_COFF(span(i*9,i*9+8),span::all) = EQN_ROW<T>(ACTIVE_SOURCES_DPSM_POINT,Points_of_enforcement.row(i),k_s,k_p, rho ,omega,mu, lamda);
   }
   return(A_COFF);
 }
 
-template Mat<complex<float>> EQN_assembler (Mat<float>, Mat<float>, float,float,float, float,float,float);
-template Mat<complex<double>> EQN_assembler (Mat<double>, Mat<double>, double,double,double, double,double,double);
+template Mat<complex<float>> EQN_assembler (const Mat<float>&, const Mat<float>&, float,float,float, float,float,float);
+template Mat<complex<double>> EQN_assembler (const Mat<double> &,const Mat<double>&, double,double,double, double,double,double);
+
+
+template <typename T>
+Mat<complex<T>> solve_dpsm_str (const Mat<T> & ACTIVE_SOURCES_DPSM_POINT,const Mat<T> & PASSIVE_SOURCES_DPSM_POINT, cx_3d<T> STRESS_CX_3D_MATRIX , const Mat<T> & Points_of_enforcement, T k_s,T k_p,T rho , T omega,T mu,T lamda){
+  Mat<T> TOTAL_SOURCES_DPSM_MAT = join_cols(ACTIVE_SOURCES_DPSM_POINT,PASSIVE_SOURCES_DPSM_POINT);
+  Mat<complex<T>> EQN_MAT_assembled = EQN_assembler(TOTAL_SOURCES_DPSM_MAT,Points_of_enforcement,k_s,k_p, rho ,omega,mu, lamda);
+  
+  if (EQN_MAT_assembled.has_nan()){
+    cout << " NAN Detedted" << endl;
+  }
+  Col<complex<T>> STRESS_Col_ENFORCER(STRESS_CX_3D_MATRIX.size() * 9,fill::zeros);
+
+  
+  #pragma omp parallel for
+  for (int i = 0; i < STRESS_CX_3D_MATRIX.size() ; ++i) {
+    for (int j = 0; j < 3; ++j) {
+      STRESS_Col_ENFORCER(span(i*9+j*3,i*9+j*3+2)) = STRESS_CX_3D_MATRIX[i].col(j);
+    }
+  }
+  
+  EQN_MAT_assembled.save("DBUG_A_MATRIX.csv",csv_ascii);
+  STRESS_Col_ENFORCER.save("DBUG_B_MATRIX.csv",csv_ascii);
+  
+  cout << "Starting Solving Linear Equations" << endl;
+  Col<complex<T>> solid_point_strength_colvec = solve(EQN_MAT_assembled,STRESS_Col_ENFORCER);
+  cout << "Completed Solving Linear Equations" << endl;
+  
+  cout << solid_point_strength_colvec.n_elem/ 3 << endl;
+  
+  Mat<complex<T>> SOLID_STR_MAT(solid_point_strength_colvec.n_elem/ 3,3,fill::zeros) ;
+  cout << "Cowabanga" << endl;
+  for (int i = 0; i < SOLID_STR_MAT.n_rows; ++i) {
+    Row<complex<T>> temp_rowvec =trans(solid_point_strength_colvec(span(i*3,i*3+2)));
+    SOLID_STR_MAT.row(i) = temp_rowvec;
+  }
+
+  cout << "Cowabanga_2" << endl;
+  return(SOLID_STR_MAT);
+}
+
+template Mat<complex<float>> solve_dpsm_str (const Mat<float> & ,const Mat<float> &, cx_3d<float> , const Mat<float> & , float ,float ,float  , float ,float ,float );
+template Mat<complex<double>> solve_dpsm_str (const Mat<double> & ,const Mat<double> &, cx_3d<double> , const Mat<double> & , double ,double ,double  , double ,double ,double );

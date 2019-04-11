@@ -143,8 +143,8 @@ int main(){
 
   Row<P_DTYPE> source_point = {1,1,1};
   Row<P_DTYPE> target_point = {2,2,2};
-  Mat<P_DTYPE> Source_Mat = {{0,0,0},{0,0,15}};
-  Mat<P_DTYPE> Target_plane = {{1,1,1},{2,2,2}};
+  Mat<P_DTYPE> Source_Mat = {{0,0,0}};
+  Mat<P_DTYPE> Target_plane = {{0,0,1}};
 
   // complex<P_DTYPE> img_start(0,1.0);
   // complex<P_DTYPE> e_p = exp(img_start * k_p_aluminium * vec_mag<P_DTYPE>(target_point-source_point))/vec_mag<P_DTYPE>(target_point-source_point);
