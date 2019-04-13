@@ -15,7 +15,7 @@ Written By :
 
 
 #include<iostream>
-#include "dpsm_interface.hpp"
+#include "dpsm_core.hpp"
 #include <omp.h>
 
 using std::cout;
@@ -37,12 +37,6 @@ using std::ofstream;
 
 // This function is not working in the header file
 
-template<typename T>
-dpsm::solid_interface<T> combine_interface(dpsm::solid_interface<T> interface1,dpsm::solid_interface<T> interface2){
-  Mat<T> joined_mats = join_cols(interface1.interface_source_1,interface2.interface_source_1);
-  dpsm::solid_interface <T> joint_interface_solid(joined_mats,interface1.normal_to_solid_interface);
-  return(joint_interface_solid);
-};
 
 template <typename T>
 cx_3d<T> join_cx_3d(cx_3d<T> former, cx_3d<T> latter){

@@ -103,3 +103,11 @@ namespace dpsm{
 
   
 };
+
+
+template<typename T>
+dpsm::solid_interface<T> combine_interface(dpsm::solid_interface<T> interface1,dpsm::solid_interface<T> interface2){
+  Mat<T> joined_mats = join_cols(interface1.interface_source_1,interface2.interface_source_1);
+  dpsm::solid_interface <T> joint_interface_solid(joined_mats,interface1.normal_to_solid_interface);
+  return(joint_interface_solid);
+};

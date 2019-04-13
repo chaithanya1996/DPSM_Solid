@@ -18,7 +18,7 @@ Written By :
 
 
 #include<iostream>
-#include "dpsm_interface.hpp"
+#include "dpsm_core.hpp"
 
 using std::cout;
 using std::endl;
@@ -36,12 +36,6 @@ using std::ofstream;
 
 // This function is not working in the header file
 
-template<typename T>
-dpsm::solid_interface<T> combine_interface(dpsm::solid_interface<T> interface1,dpsm::solid_interface<T> interface2){
-  Mat<T> joined_mats = join_cols(interface1.interface_source_1,interface2.interface_source_1);
-  dpsm::solid_interface <T> joint_interface_solid(joined_mats,interface1.normal_to_solid_interface);
-  return(joint_interface_solid);
-};
 
 
 template <typename TYPE>
@@ -300,36 +294,36 @@ int main(){
   // cout << normal_to_location << endl;
   // cout << Transducer_stress_Cx_3d.size()  << endl;
   // cout << T_lam_ply_vec[0].active_sources.n_rows << endl;
-  Mat<complex<P_DTYPE>>  Result = get_strength_hetro(T_lam_ply_vec[0].active_sources, T_lam_ply_vec[0].passve_sources,r_s_tran,normal_to_location,Transducer_stress_Cx_3d,k_s_aluminium,k_p_aluminium,rho_al,omega_trans,mu_al,lamda_al,true);
+  // Mat<complex<P_DTYPE>>  Result = get_strength_hetro(T_lam_ply_vec[0].active_sources, T_lam_ply_vec[0].passve_sources,r_s_tran,normal_to_location,Transducer_stress_Cx_3d,k_s_aluminium,k_p_aluminium,rho_al,omega_trans,mu_al,lamda_al,true);
 
-  // cx_3d<double> Stress_resultants_Result =stress_from_points(T_lam_ply_vec[0].active_sources, Result, observation_target,k_s_aluminium,k_p_aluminium,rho_al,omega_trans,lamda_al,mu_al);
-  // cout << "Black sheep 12" << endl ;
+  // // cx_3d<double> Stress_resultants_Result =stress_from_points(T_lam_ply_vec[0].active_sources, Result, observation_target,k_s_aluminium,k_p_aluminium,rho_al,omega_trans,lamda_al,mu_al);
+  // // cout << "Black sheep 12" << endl ;
 
-  Result.save("1st_ply_point_strength.csv",csv_ascii);
-  std::string PATH_TO_SAVE_RESULTS = "/home/chaithanya/Documents/DPSM_Solid/Results/";
+  // Result.save("1st_ply_point_strength.csv",csv_ascii);
+  // std::string PATH_TO_SAVE_RESULTS = "/home/chaithanya/Documents/DPSM_Solid/Results/";
   
-  /* -----------------------------------------------------
+  // /* -----------------------------------------------------
 
-     ------------------------------------------------------ */
-  cx_3d<P_DTYPE> sigma_resultant_interface =stress_from_points<P_DTYPE>(T_lam_ply_vec[0].active_sources, Result, al_st_interface ,k_s_aluminium,k_p_aluminium,rho_al,omega_trans,lamda_al,mu_al);
+  //    ------------------------------------------------------ */
+  // cx_3d<P_DTYPE> sigma_resultant_interface =stress_from_points<P_DTYPE>(T_lam_ply_vec[0].active_sources, Result, al_st_interface ,k_s_aluminium,k_p_aluminium,rho_al,omega_trans,lamda_al,mu_al);
 
-   cout << "Calculated the Stress At the Interface" << endl ;
+  //  cout << "Calculated the Stress At the Interface" << endl ;
  
-   // cout << T_lam_ply_vec[1].active_sources.n_rows << endl;
-   // cout << "Black sheep 13" << endl ;
-   // cout << T_lam_ply_vec[1].passve_sources.n_rows << endl;
+  //  // cout << T_lam_ply_vec[1].active_sources.n_rows << endl;
+  //  // cout << "Black sheep 13" << endl ;
+  //  // cout << T_lam_ply_vec[1].passve_sources.n_rows << endl;
 
-   // cout << al_st_interface << endl;
-   // cout << "-------------------------------" << endl;
-   // cout << T_lam_ply_vec[1].passve_sources << endl;
-   // cout << "-------------------------------" << endl;
-   Row<P_DTYPE> dummmy_normal = {-1,0,0};
-   int Sucess = save_cx_3d<complex<P_DTYPE>>(sigma_resultant_interface,PATH_TO_SAVE_RESULTS);
+  //  // cout << al_st_interface << endl;
+  //  // cout << "-------------------------------" << endl;
+  //  // cout << T_lam_ply_vec[1].passve_sources << endl;
+  //  // cout << "-------------------------------" << endl;
+  //  Row<P_DTYPE> dummmy_normal = {-1,0,0};
+  //  int Sucess = save_cx_3d<complex<P_DTYPE>>(sigma_resultant_interface,PATH_TO_SAVE_RESULTS);
 
-   T_lam_ply_vec[1].passve_sources.save("D_BUG_PASS_PASSIVE.csv",csv_ascii);
-   al_st_interface.save("D_BUG_PASS_active.csv",csv_ascii);
-   Mat<complex<P_DTYPE>> Result_2 = get_strength_hetro(al_st_interface, T_lam_ply_vec[1].passve_sources,r_s_tran,dummmy_normal,sigma_resultant_interface,k_s_steel,k_p_steel,rho_st,omega_trans,mu_st,lamda_st,false);
-   Result_2.save("2nd_ply_point_strength.csv",csv_ascii);
+  //  T_lam_ply_vec[1].passve_sources.save("D_BUG_PASS_PASSIVE.csv",csv_ascii);
+  //  al_st_interface.save("D_BUG_PASS_active.csv",csv_ascii);
+  //  Mat<complex<P_DTYPE>> Result_2 = get_strength_hetro(al_st_interface, T_lam_ply_vec[1].passve_sources,r_s_tran,dummmy_normal,sigma_resultant_interface,k_s_steel,k_p_steel,rho_st,omega_trans,mu_st,lamda_st,false);
+  //  Result_2.save("2nd_ply_point_strength.csv",csv_ascii);
 
    
   return(0);

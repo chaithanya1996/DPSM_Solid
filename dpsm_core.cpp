@@ -496,17 +496,7 @@ Cube<complex<T>> G_diff_ijk_point(Row<T> source_point_row,Row<T> target_point_ro
 // ------------------------------------------------------------------//
 // -----------------Stress Calculation Procedure---------------------//
 // ----------------------------------------------------------------//
-// template<typename T>
-// Cube<T> transpose_cube_in_dir_2(Cube<T> cube_to_trans){
-//   Cube<T> return_cx_cube;
-//   for (int i=0; i < 0; ++i) {
-//     return_cx_cube.slice(i) = cube_to_trans.slice(i).t();
-//   }
-//   return(return_cx_cube);
-// }
 
-// template Cube<double> transpose_cube_in_dir_2(Cube<double>);
-// template Cube<float> transpose_cube_in_dir_2(Cube<float>);
 
 
 template <typename T>
@@ -570,349 +560,8 @@ Cube<complex<T>> S_coff_source_target (Row<T> source_point_row,Row<T> target_poi
 template  Cube<complex<float>> S_coff_source_target (Row<float>,Row<float> ,float , float,float , float,float,float);
 template  Cube<complex<double>> S_coff_source_target (Row<double>,Row<double> ,double , double,double , double,double,double);
 
-// template <typename T>
-// cx_5d<T> stress_coff_calc(const cx_5d<T> G_ijk_source,T lamda,T mu){
-//   int size_1 = G_ijk_source.size();
-//   int size_2 = G_ijk_source[0].size();
-//   cx_5d<T> Converterd_stress_coff(size_1,cx_4d<T>(size_2,Cube<complex<T>>(3,3,3,fill::zeros)));
-  
-//   for (int i = 0; i < size_1; ++i) {
-//     for (int j = 0; j < size_2; ++j) {
-//       Converterd_stress_coff[i][j] = stress_coff_point<T>(G_ijk_source[i][j],lamda,mu);
-//     }
-//   }
-//   return(Converterd_stress_coff);
-// }
-
-// template cx_5d<double> stress_coff_calc(const cx_5d<double>,double,double);
-// template cx_5d<float> stress_coff_calc(const cx_5d<float>,float,float);
 
 
-
-// template <typename T>
-// cx_3d<T> stress_cal_one_source(cx_4d<T> G_ijk_cube, Row<complex<T>> strength_cube){
-
-//   Col<complex<T>> strength_cube_col = strength_cube.t();
-//   int n_row_cube = G_ijk_cube.size();
-
-//   cx_3d<T> obs_plane_stress_comp(n_row_cube,Mat<complex<T>>(3,3,fill::zeros));
-  
-//   for(size_t i = 0; i < n_row_cube; i++){
-//     for(size_t k = 0; k < 3; k++){
-//       Cube<complex<T>> mat_to_operate = G_ijk_cube[i].subcube( 0, k, 0, 2, k, 2 );
-//       Mat<complex<T>> converted_cub_tomat = conv_cube_2_mat(mat_to_operate);
-//       obs_plane_stress_comp[i]= obs_plane_stress_comp[i] + (converted_cub_tomat) * strength_cube_col(k) ;
-//     }
-//   }
-//   return(obs_plane_stress_comp);
-// }
-
-// template cx_3d<float> stress_cal_one_source(cx_4d<float>, Row<complex<float>>);
-// template cx_3d<double> stress_cal_one_source(cx_4d<double>, Row<complex<double>>);
-
-
-// template <typename T>
-// cx_3d<T> stress_cal(const cx_5d<T> G_ijk_source,Mat<complex<T>> src_str,T lamda,T mu){ // the G_ijk_must be Converted Soueces here
-
-//   int target_size = G_ijk_source[0].size(); // Thought as Correct 
-//   cx_3d<T> stress_on_plane(target_size,Mat<complex<T>>(3,3,fill::zeros));
-  
-//   // MultiThreading the Calculations Using OPenMP
-//   #pragma omp parallel for
-//   for(size_t i = 0; i < src_str.n_cols; i++){
-//     cx_3d<T> temp_call = stress_cal_one_source<T>(G_ijk_source[i],src_str.row(i));
-//     stress_on_plane = add_cx_3d<T>(stress_on_plane,temp_call);
-//   }
-//   return(stress_on_plane);
-// }
-
-// template cx_3d<double> stress_cal(const cx_5d<double>,Mat<complex<double>>,double,double);
-// template cx_3d<float> stress_cal(const cx_5d<float>,Mat<complex<float>>,float,float);
-
-
-
-// // The Entire Fucntion is Redundant Waste Memory And thereof Needed Care ful Restructuing of Code To Avoid Memory Problem in Furture
-// // This Paticular Function is used with constat Pointer Reference to Minimize the Memory usage Peak During the Computation
-// template <typename T>
-// cx_3d<T> stress_from_points(Mat<T> source_points, Mat<complex<T>> src_str, Mat<T> target_points,T k_s , T k_p,T rho ,T omega , T lamda,T mu){
-//   cx_5d<T> G_vals_for_given = G_ijk_full_matrix<T>(source_points,target_points,k_s ,k_p,rho , omega); 
-//   cx_5d<T> stress_for_given  =  stress_coff_calc<T>(G_vals_for_given,lamda, mu); // Pass by Reference
-//   cx_3d<T> str_vals = stress_cal<T>(stress_for_given,src_str,lamda,mu); // Pass By Reference 
-//   return(str_vals);
-// }
-
-// template cx_3d<float> stress_from_points(Mat<float>,Mat<complex<float>>,Mat<float>,float,float,float,float,float,float);
-// template cx_3d<double> stress_from_points(Mat<double>,Mat<complex<double>>,Mat<double>,double,double,double,double,double,double);
-
-/* Redundant in Occasion of Convering all observing plane to Vectors 
-
-std::vector<cx_double> conv_observing_plane_mat_to_vector(cx_mat Observing_plane){
-  int no_of_rows = Observing_plane.n_rows;
-  int no_of_columns = Observing_plane.n_cols;
-
-  std::vector<cx_double> in_vecc_format(no_of_rows * no_of_columns);
-  
-  for(int i = 0; i < no_of_rows; ++i){
-    for( int j = 0; j < no_of_columns; ++j){
-      in_vecc_format[i*no_of_columns+j] = Observing_plane[i,j];
-    }
-  }
-  return(in_vecc_format);
-}
-
-*/
-
-
-// Stress Vector Calculation 
-
-
-
-// cx_cube stess_cal(cx_cube G_ijk_cube, cx_rowvec strength_cube){
-//   int n_row_cube = G_ijk_cube.n_rows;
-//   int n_col_cube = G_ijk_cube.n_cols;
-//   cx_cube obs_plane_stress_comp(n_row_cube,n_col_cube,3,fill::zeros);
-  
-//   for(size_t i = 0; i < n_row_cube; i++){
-//     for(size_t j = 0; i < n_col_cube; j++){
-
-//       cx_rowvec temp_var1 = G_ijk_cube.tube(i,j);
-//       obs_plane_stress_comp(i,j,0) = sum((temp_var1(span(0,2))  + temp_var1(span(8,10)) + temp_var1(span(18,20)))* strength_cube(0));
-//       obs_plane_stress_comp(i,j,1) = sum((temp_var1(span(3,5))  + temp_var1(span(8,10)) + temp_var1(span(18,20)))* strength_cube(0));
-//       obs_plane_stress_comp(i,j,2) = sum((temp_var1(span(6,8))  + temp_var1(span(8,10)) + temp_var1(span(18,20)))* strength_cube(0));
-//       }
-//     }
-//   return(obs_plane_stress_comp);
-// }
-
-
-// ------------------------------------------------------------------//
-// -----------------Point Strength Calculation ---------------------//
-// ----------------------------------------------------------------//
-
-
-// template <typename T>
-// Col<complex<T>> source_strength_derivation(cx_5d<T> G_ijk_cube_of_sources,cx_3d<T> stress_matrix){
-  
-//   int sources_len = stress_matrix.size();
-//   int cx_source = G_ijk_cube_of_sources.size();
-//   cout << " Source Strength Derivation --"<< cx_source <<"No_of Source Supplied -" << sources_len << endl;
-//   // cx_mat str_mat(sources_len*stress_matrix[0].n_rows,stress_matrix[0].n_cols,fill::zeros);
-//   Col<complex<T>> str_mat(sources_len * stress_matrix[0].n_elem);
-
-  
-//   int source_no = G_ijk_cube_of_sources.size() ;
-//   int target_no =  G_ijk_cube_of_sources[0].size();
-
-//   for (int i = 0; i < source_no; ++i) {
-//     for (int j = 0; j <  target_no; ++j) {
-//       if (G_ijk_cube_of_sources[i][j].has_nan()) {
-// 	cout << "NaN Detected" << "SOURCE --" << i << " Target--" << j << endl;
-//      } 
-//     }
-//   }
-//   cout << "Nan Detection Complete" << endl;
-  
-//   Cube<complex<T>> G_full(target_no * 3,source_no * 3,3,fill::zeros);
-
-//   //std::cout << "Creating G_full" << endl;
-//   // std::cout << G_full << endl;
-
-// #pragma omp parallel for
-//   for(size_t i = 0; i < sources_len; i++){
-//     for(size_t j =0; j < 3 ; ++j){
-//       str_mat.subvec(i*9+j*3,i*9+j*3+2) = stress_matrix[i].col(j);
-//     }
-//   }
-
-//   //std::cout << "Creating srmat" << endl;
-//   //std::cout << str_mat << endl;
-
-// #pragma omp parallel for
-//   for(size_t j = 0; j < target_no; j++){ 
-//     for(size_t i = 0; i < source_no; i++){
-//       G_full(span(j*3,(j*3)+2),span(i*3,i*3+2),span(0,2)) =  G_ijk_cube_of_sources[i][j];
-//     }
-//   }
-  
-//   //std::cout << "Calculated  G_full" << endl;
-//   //std::cout << G_full << endl;
-  
-//   // Converting Above Cube tot the matrix
-
-//   Mat<complex<T>> G_full_mat_form(G_full.n_rows * 3,G_full.n_cols,fill::zeros);
-
-// #pragma omp parallel for
-//   for(size_t i = 0; i < G_full.n_rows /3; i++){
-//     for(size_t j =0; j < 3 ; ++j){
-//         Mat<complex<T>> temper = G_full(span(0,2),span(0,G_full.n_cols-1),span(j,j));
-//       //      std::cout << "adjsnfdb" <<i << j << endl ;
-//       G_full_mat_form(span(i*9+j*3,i*9+j*3+2), span(0,G_full.n_cols-1) ) = temper ;
-//     }
-//   }
-
-//   //std::cout << G_full_mat_form <<endl;
-//   cout << " Start_solving " << sources_len << endl;
-
-  
-//   G_full_mat_form.save("D_BUG_G_Full.csv",csv_ascii);
-//   str_mat.save("D_BUG_str_mat.csv",csv_ascii);
-
-//   cout << "G_FULL ROWS --" << G_full_mat_form.n_rows << "Cols--" << G_full_mat_form.n_cols << endl;
-//   Col<complex<T>> col_one = solve(G_full_mat_form,str_mat);
-
-  
-//   cout << " End Solving -" << sources_len << endl;
-//   return(col_one);
-// }
-
-
-// template Col<complex<float>> source_strength_derivation(cx_5d<float>,cx_3d<float>);
-// template Col<complex<double>> source_strength_derivation(cx_5d<double>,cx_3d<double>);
-  
-// ------------------------------------------------------------------//
-// High Level Function For point Strenght caculation----------------//
-// ----------------------------------------------------------------//
-
-
-// // Need to Redesign The Hight level function for Hetro geneous and homogeneous material
-
-// template<typename T>
-// Mat<complex<T>> get_strength(Mat<T> source_point_list,T r_s,Row<T> direction_cosine,cx_3d<T> stress_matrix,T k_s,T k_p,T rho , T omega){
-  
-//   Mat<T> target_point(size(source_point_list));
-//   for(int i = 0 ; i < source_point_list.n_rows;++i){
-//     target_point.row(i) = source_point_list.row(i) - r_s * direction_cosine;
-//   }
-  
-//   int no_of_source_points = source_point_list.n_rows;
-//   cx_5d<T> G_matrix_calculations(no_of_source_points,cx_4d<T>(no_of_source_points,Cube<complex<T>>(3,3,3,fill::zeros)));
-  
-//   for(int i = 0; i < no_of_source_points; ++i){
-//     G_matrix_calculations[i] = G_p_diff_ijk<T>(source_point_list.row(i), target_point,k_s,k_p,rho ,omega);
-//   }
-
-  
-//   Col<complex<T>> point_strenghts = source_strength_derivation(G_matrix_calculations,stress_matrix);
-  
-  
-//   T out_mat_rows =  point_strenghts.n_elem/3;
-//   Mat<complex<T>> P_mat_form(out_mat_rows,3,fill::zeros);
-  
-//   for(int i = 0;i<out_mat_rows;++i){
-//     for( int j = 0; j < 3 ;++j){
-//       P_mat_form(i,j) = point_strenghts(i*3+j);
-//     }
-//   }
-//   return(P_mat_form);
-// }
-
-// template Mat<complex<float>> get_strength(Mat<float>,float,Row<float>,cx_3d<float>,float,float,float,float);
-// template Mat<complex<double>> get_strength(Mat<double>,double,Row<double>,cx_3d<double>,double,double,double,double);
-
-
-// template <typename T>
-// Mat<complex<T>> get_strength_hetro(Mat<T> source_point_list,Mat<T> passive_source_list ,T r_s, Row<T> direction_cosine,cx_3d<T> stress_matrix,T k_s,T k_p,T rho , T omega,T mu,T lamda,bool have_active_sources){
-
-  
-//   // incoming Point Locations are Exact Location on which the Sources are placed
-  
-//   int no_of_active_sources = source_point_list.n_rows;
-//   int no_of_passive_sources = passive_source_list.n_rows;
-
-//   Mat<complex<T>> active_source_str(no_of_active_sources,3,fill::zeros);
-//   Mat<complex<T>> passive_source_str(no_of_passive_sources,3,fill::zeros);
-
-//   // Mat<T> total_sources = join_cols(source_point_list,passive_source_list);
-
-//   Mat<T> total_sources = (have_active_sources) ? join_cols(source_point_list,passive_source_list) : passive_source_list;
-  
-//   Mat<T> exact_source_point_mat_stress(no_of_active_sources,3);
-
-  
-//   cout << "Black Sheep 7" << endl;
-// #pragma omp parallel for 
-//   for (int i = 0; i < no_of_active_sources; ++i) {
-//     exact_source_point_mat_stress.row(i) = source_point_list.row(i)  + direction_cosine * r_s ;
-//   }
-
-  
-//    // cout << source_point_list << endl;
-//    // cout << "-------------------------------" << endl;
-   
-//    // cout << passive_source_list << endl;
-//    // cout << "-------------------------------" << endl;
-   
-//   cout << "Printing INPUT" << endl;
-//   if (!have_active_sources) {
-//     total_sources.save("D_BUG_TOATL_SOURCES.csv",csv_ascii);
-//     exact_source_point_mat_stress.save("D_BUG_Exact_SOURCES.csv",csv_ascii);
-//   }
-  
-//   cx_5d<T> G_matrix_calculations(total_sources.n_rows,cx_4d<T>(no_of_active_sources ,Cube<complex<T>>(3,3,3,fill::zeros)));
-// #pragma omp parallel for 
-//   for(int i = 0; i < total_sources.n_rows; ++i){
-//     //std::cout << i << "\n";
-//     G_matrix_calculations[i] = G_p_diff_ijk<T>(total_sources.row(i),exact_source_point_mat_stress,k_s,k_p,rho ,omega);
-//   }
-  
-//   G_matrix_calculations = stress_coff_calc<T>(G_matrix_calculations,mu,lamda);
-  
-//   cout << "Starting Solving Linear Equations" << endl;
-//   Col<complex<T>> solid_point_strength_colvec = source_strength_derivation(G_matrix_calculations,stress_matrix);
-//   cout << "Completed Solving Linear Equations" << endl;
-  
-//   int out_mat_rows =  solid_point_strength_colvec.n_elem/3;
-//   Mat<complex<T>> P_mat_form(out_mat_rows,3,fill::zeros);
-  
-//   for(int i = 0;i<out_mat_rows;++i){
-//     for( int j = 0; j < 3 ;++j){
-//       P_mat_form(i,j) = solid_point_strength_colvec(i*3+j);
-//     }
-//   }
-  
-//   return(P_mat_form);
-// }
-
-
-// // Initializing The Template Class
-// template Mat<complex<float>> get_strength_hetro(Mat<float>,Mat<float>,float,Row<float>,cx_3d<float>,float,float,float,float,float,float,bool);
-// template Mat<complex<double>> get_strength_hetro(Mat<double>,Mat<double>,double,Row<double>,cx_3d<double>,double,double,double,double,double,double,bool);
-
-// template <typename T>
-// Mat<complex<T>> solve_dpsm_str (Mat<T> ACTIVE_SOURCES_DPSM_POINT, Mat<T> PASSIVE_SOURCES_DPSM_POINT, cx_3d<T> STRESS_CX_3D_MATRIX , Mat<T> Points_of_enforcement, T k_s,T k_p,T rho , T omega,T mu,T lamda){
-  
-//   int total_source_no = ACTIVE_SOURCES_DPSM_POINT.n_rows + PASSIVE_SOURCES_DPSM_POINT.n_rows;
-//   int no_points_enforce = Points_of_enforcement.n_rows;
-  
-//   Mat<T> TOTAL_SOURCE_DPSM_MAT = join_cols(ACTIVE_SOURCES_DPSM_POINT,PASSIVE_SOURCES_DPSM_POINT);
-  
-//   cx_5d<T> G_matrix(total_source_no,cx_4d<T>(no_points_enforce ,Cube<complex<T>>(3,3,3,fill::zeros)));
-// #pragma omp parallel for 
-//   for(int i = 0; i < total_source_no; ++i){
-//     //std::cout << i << "\n";
-//     G_matrix[i] = G_p_diff_ijk<T>(TOTAL_SOURCE_DPSM_MAT.row(i),Points_of_enforcement,k_s,k_p,rho ,omega);
-//   }
-
-//   G_matrix = stress_coff_calc<T>(G_matrix,mu,lamda);
-  
-//   cout << "Starting Solving Linear Equations" << endl;
-//   Col<complex<T>> solid_point_strength_colvec = source_strength_derivation(G_matrix,STRESS_CX_3D_MATRIX);
-//   cout << "Completed Solving Linear Equations" << endl;
-
-//   int out_mat_rows =  solid_point_strength_colvec.n_elem/3;
-//   Mat<complex<T>> P_mat_form(out_mat_rows,3,fill::zeros);
-  
-//   for(int i = 0;i<out_mat_rows;++i){
-//     for( int j = 0; j < 3 ;++j){
-//       P_mat_form(i,j) = solid_point_strength_colvec(i*3+j);
-//     }
-//   }
-  
-//   return(P_mat_form);
-// }
-
-// template Mat<complex<float>> solve_dpsm_str (Mat<float>, Mat<float>, cx_3d<float>, Mat<float>, float,float,float,float,float,float);
-// template Mat<complex<double>> solve_dpsm_str (Mat<double>, Mat<double>, cx_3d<double>, Mat<double>, double,double,double,double,double,double);
 
 template <typename T> Mat<complex<T>>
 EQN_ROW(const Mat<T> &ACTIVE_SOURCES_DPSM_POINT, Row<T> Points_of_enforcement, T k_s, T k_p,T rho , T omega, T mu,T lamda){
@@ -950,6 +599,7 @@ template Mat<complex<double>> EQN_assembler (const Mat<double> &,const Mat<doubl
 
 template <typename T>
 Mat<complex<T>> solve_dpsm_str (const Mat<T> & ACTIVE_SOURCES_DPSM_POINT,const Mat<T> & PASSIVE_SOURCES_DPSM_POINT, cx_3d<T> STRESS_CX_3D_MATRIX , const Mat<T> & Points_of_enforcement, T k_s,T k_p,T rho , T omega,T mu,T lamda){
+  
   Mat<T> TOTAL_SOURCES_DPSM_MAT = join_cols(ACTIVE_SOURCES_DPSM_POINT,PASSIVE_SOURCES_DPSM_POINT);
   Mat<complex<T>> EQN_MAT_assembled = EQN_assembler(TOTAL_SOURCES_DPSM_MAT,Points_of_enforcement,k_s,k_p, rho ,omega,mu, lamda);
   
@@ -965,9 +615,11 @@ Mat<complex<T>> solve_dpsm_str (const Mat<T> & ACTIVE_SOURCES_DPSM_POINT,const M
       STRESS_Col_ENFORCER(span(i*9+j*3,i*9+j*3+2)) = STRESS_CX_3D_MATRIX[i].col(j);
     }
   }
-  
+
+  cout << "Started Writing To Disk " << endl;
   EQN_MAT_assembled.save("DBUG_A_MATRIX.csv",csv_ascii);
   STRESS_Col_ENFORCER.save("DBUG_B_MATRIX.csv",csv_ascii);
+    cout << "Completed Writing To Disk " << endl;
   
   cout << "Starting Solving Linear Equations" << endl;
   Col<complex<T>> solid_point_strength_colvec = solve(EQN_MAT_assembled,STRESS_Col_ENFORCER);
@@ -988,3 +640,36 @@ Mat<complex<T>> solve_dpsm_str (const Mat<T> & ACTIVE_SOURCES_DPSM_POINT,const M
 
 template Mat<complex<float>> solve_dpsm_str (const Mat<float> & ,const Mat<float> &, cx_3d<float> , const Mat<float> & , float ,float ,float  , float ,float ,float );
 template Mat<complex<double>> solve_dpsm_str (const Mat<double> & ,const Mat<double> &, cx_3d<double> , const Mat<double> & , double ,double ,double  , double ,double ,double );
+
+
+template <typename T>
+Mat<complex<T>> stress_calc_mat_ver(const Mat<T> &ACTIVE_SOURCES_DPSM_POINT, const Mat<T> &Points_of_enforcement, const Mat<complex<T>> &ACTIVE_STR , T k_s,T k_p,T rho , T omega,T mu,T lamda){
+  Mat<complex<T>> EQN_MAT  = EQN_assembler(ACTIVE_SOURCES_DPSM_POINT,Points_of_enforcement,k_s,k_p, rho ,omega,mu, lamda);
+  Mat<complex<T>> stress_vals = EQN_MAT * ACTIVE_STR;
+  return(stress_vals);
+}
+
+template Mat<complex<float>> stress_calc_mat_ver(const Mat<float> &, const Mat<float> &, const Mat<complex<float>> &, float,float,float,float,float,float);
+template Mat<complex<double>> stress_calc_mat_ver(const Mat<double> &, const Mat<double> &, const Mat<complex<double>> &, double,double,double,double,double,double);
+
+template <typename T>
+cx_3d<T> stress_calc_3d_ver(const Mat<T> &ACTIVE_SOURCES_DPSM_POINT, const Mat<T> &Points_of_enforcement, const Mat<complex<T>> &ACTIVE_STR , T k_s,T k_p,T rho , T omega,T mu,T lamda){
+  Mat<complex<T>> EQN_MAT  = EQN_assembler(ACTIVE_SOURCES_DPSM_POINT,Points_of_enforcement,k_s,k_p, rho ,omega,mu, lamda);
+  Col<complex<T>> ACTIVE_STR_COL(ACTIVE_STR.n_elem,fill::zeros);
+  #pragma omp parallel for
+  for (int i = 0; i < ACTIVE_STR.n_rows; ++i) {
+    ACTIVE_STR_COL(span(i*3,i*3+2)) = trans(ACTIVE_STR.row(i));
+  }
+  Col<complex<T>> stress_vals = EQN_MAT * ACTIVE_STR;
+  cx_3d<T> stress_vals_cx(stress_vals.n_elem/9,Mat<complex<T>>(3,3,fill::zeros));
+  #pragma omp parallel for
+  for (int i = 0; i < stress_vals_cx.size(); ++i) {
+    for (int j = 0; j < 3; ++j) {
+      stress_vals_cx[i].col(j) = stress_vals(span(i*9+j*3,i*9+j*3+2));
+    }
+  }
+  return(stress_vals_cx);
+}
+
+template cx_3d<float> stress_calc_3d_ver(const Mat<float> &, const Mat<float> &, const Mat<complex<float>> &, float,float,float ,float,float,float);
+template cx_3d<double> stress_calc_3d_ver(const Mat<double> &, const Mat<double> &, const Mat<complex<double>> &, double,double,double ,double,double,double);

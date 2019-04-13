@@ -18,7 +18,7 @@ Written By :
 
 
 #include<iostream>
-#include "dpsm_interface.hpp"
+#include "dpsm_core.hpp"
 #include <omp.h>
 
 using std::cout;
@@ -38,14 +38,6 @@ using std::ofstream;
 
 
 // This function is not working in the header file
-
-template<typename T>
-dpsm::solid_interface<T> combine_interface(dpsm::solid_interface<T> interface1,dpsm::solid_interface<T> interface2){
-  Mat<T> joined_mats = join_cols(interface1.interface_source_1,interface2.interface_source_1);
-  dpsm::solid_interface <T> joint_interface_solid(joined_mats,interface1.normal_to_solid_interface);
-  return(joint_interface_solid);
-};
-
 template <typename T>
 cx_3d<T> join_cx_3d(cx_3d<T> former, cx_3d<T> latter){
 
@@ -79,7 +71,7 @@ int main(){
 
 
    
-  using P_DTYPE = double;  // Defining the Precision of the Computation
+  using P_DTYPE = float;  // Defining the Precision of the Computation
   
    // Defining Parameters (work in progress)
   P_DTYPE mm = 0.001;
@@ -125,7 +117,7 @@ int main(){
    ----------------------------------*/
 
     // Transducer Properties
-  P_DTYPE trans_freq =  1000 * kHz;
+  P_DTYPE trans_freq =  50 * kHz;
   P_DTYPE omega_trans = 2 * M_PI * trans_freq ;
 
   // Transducer Properties in Aluminium
@@ -136,12 +128,29 @@ int main(){
 
 
   // calculating the r_s for given Transducer and Medium 
-  int r_s_trans_factor = 1;
+  int r_s_trans_factor = 5;
   P_DTYPE r_s_tran = r_s_calculator<P_DTYPE>(trans_freq,c_al,r_s_trans_factor);
   cout << " The Distance Between Transducer Source Points --" << r_s_tran << endl;
 
   
   // Defining The Edges
+  Row<P_DTYPE> S_1_origin = {0,0,0};
+  Row<P_DTYPE> S_1_vec_x = {20*cm,0,0};
+  Row<P_DTYPE> S_1_vec_y = {0,20*cm,0};
+  
+  int S_1_X_DIVS = vec_mag<P_DTYPE>(S_1_vec_x - S_1_origin)/r_s_tran;
+  int S_1_Y_DIVS = vec_mag<P_DTYPE>(S_1_vec_y - S_1_origin)/r_s_tran;
+  Row<P_DTYPE> S_1_normal = {1,0,1};
+  Row<P_DTYPE> S_1_normal_reverse = {0,0,-1};
+
+  Row<P_DTYPE> S_2_origin = {0,0,5*cm};
+  Row<P_DTYPE> S_2_vec_x = {20*cm,0,5*cm};
+  Row<P_DTYPE> S_2_vec_y = {0,20*cm,5*cm};
+  
+  int S_2_X_DIVS = vec_mag<P_DTYPE>(S_2_vec_x - S_2_origin)/r_s_tran;
+  int S_2_Y_DIVS = vec_mag<P_DTYPE>(S_2_vec_y - S_2_origin)/r_s_tran;
+  Row<P_DTYPE> S_2_normal = {0,0,-1};
+  Row<P_DTYPE> S_2_normal_reverse = {0,0,1};
 
   
   Row<P_DTYPE> S_3_origin = {0,0,0};
@@ -152,7 +161,6 @@ int main(){
   int S_3_Y_DIVS = vec_mag<P_DTYPE>(S_3_vec_y - S_3_origin)/r_s_tran;
   Row<P_DTYPE> S_3_normal = {1,0,0};
   Row<P_DTYPE> S_3_normal_reverse = {-1,0,0};
-
 			     
   Row<P_DTYPE> S_4_origin = {20*cm,0,0};
   Row<P_DTYPE> S_4_vec_x = {20*cm,0,5*cm};
@@ -185,8 +193,8 @@ int main(){
   
   // Generating the Surfaces
   
-  // Mat<P_DTYPE> SURFACE_1_MAT =  rectangle_generator<P_DTYPE>( S_1_vec_x, S_1_vec_y, S_1_origin ,S_1_X_DIVS, S_1_Y_DIVS);
-  // Mat<P_DTYPE> SURFACE_2_MAT =  rectangle_generator<P_DTYPE>( S_2_vec_x, S_2_vec_y, S_2_origin ,S_2_X_DIVS, S_2_Y_DIVS);
+  Mat<P_DTYPE> SURFACE_1_MAT =  rectangle_generator<P_DTYPE>( S_1_vec_x, S_1_vec_y, S_1_origin ,S_1_X_DIVS, S_1_Y_DIVS);
+  Mat<P_DTYPE> SURFACE_2_MAT =  rectangle_generator<P_DTYPE>( S_2_vec_x, S_2_vec_y, S_2_origin ,S_2_X_DIVS, S_2_Y_DIVS);
   Mat<P_DTYPE> SURFACE_3_MAT =  rectangle_generator<P_DTYPE>( S_3_vec_x, S_3_vec_y, S_3_origin ,S_3_X_DIVS, S_3_Y_DIVS);
   Mat<P_DTYPE> SURFACE_4_MAT =  rectangle_generator<P_DTYPE>( S_4_vec_x, S_4_vec_y, S_4_origin ,S_4_X_DIVS, S_4_Y_DIVS);
   Mat<P_DTYPE> SURFACE_5_MAT =  rectangle_generator<P_DTYPE>( S_5_vec_x, S_5_vec_y, S_5_origin ,S_5_X_DIVS, S_5_Y_DIVS);
@@ -194,8 +202,8 @@ int main(){
 
   // Exact Locations
 
-  // Mat<P_DTYPE> SURFACE_1_MAT_DPSM_SOURCE = source_point_placer<P_DTYPE>(SURFACE_1_MAT, S_1_normal_reverse, r_s_tran);
-  // Mat<P_DTYPE> SURFACE_2_MAT_DPSM_SOURCE = source_point_placer<P_DTYPE>(SURFACE_2_MAT, S_2_normal_reverse, r_s_tran);
+  Mat<P_DTYPE> SURFACE_1_MAT_DPSM_SOURCE = source_point_placer<P_DTYPE>(SURFACE_1_MAT, S_1_normal_reverse, r_s_tran);
+  Mat<P_DTYPE> SURFACE_2_MAT_DPSM_SOURCE = source_point_placer<P_DTYPE>(SURFACE_2_MAT, S_2_normal_reverse, r_s_tran);
   Mat<P_DTYPE> SURFACE_3_MAT_DPSM_SOURCE = source_point_placer<P_DTYPE>(SURFACE_3_MAT, S_3_normal_reverse, r_s_tran);
   Mat<P_DTYPE> SURFACE_4_MAT_DPSM_SOURCE = source_point_placer<P_DTYPE>(SURFACE_4_MAT, S_4_normal_reverse, r_s_tran);
   Mat<P_DTYPE> SURFACE_5_MAT_DPSM_SOURCE = source_point_placer<P_DTYPE>(SURFACE_5_MAT, S_5_normal_reverse, r_s_tran);
@@ -203,20 +211,31 @@ int main(){
 
   // Defining the Stress Coniditons
   
-  // Mat<P_DTYPE> SURFACE_1_STR_BC(size(SURFACE_1_MAT_DPSM_SOURCE),fill::zeros);
-  // Mat<P_DTYPE> SURFACE_2_STR_BC(size(SURFACE_2_MAT_DPSM_SOURCE),fill::zeros);
+  cx_3d<P_DTYPE> SURFACE_1_STR_BC(SURFACE_1_MAT_DPSM_SOURCE.n_rows,Mat<complex<P_DTYPE>>(3,3,fill::zeros));
+  cx_3d<P_DTYPE> SURFACE_2_STR_BC(SURFACE_2_MAT_DPSM_SOURCE.n_rows,Mat<complex<P_DTYPE>>(3,3,fill::zeros));
   cx_3d<P_DTYPE> SURFACE_3_STR_BC(SURFACE_3_MAT_DPSM_SOURCE.n_rows,Mat<complex<P_DTYPE>>(3,3,fill::zeros));
   cx_3d<P_DTYPE> SURFACE_4_STR_BC(SURFACE_4_MAT_DPSM_SOURCE.n_rows,Mat<complex<P_DTYPE>>(3,3,fill::zeros));
   cx_3d<P_DTYPE> SURFACE_5_STR_BC(SURFACE_5_MAT_DPSM_SOURCE.n_rows,Mat<complex<P_DTYPE>>(3,3,fill::zeros));
   cx_3d<P_DTYPE> SURFACE_6_STR_BC(SURFACE_6_MAT_DPSM_SOURCE.n_rows,Mat<complex<P_DTYPE>>(3,3,fill::zeros));
 
+  
+  for (int i = 0; i < SURFACE_1_MAT_DPSM_SOURCE.n_rows; ++i) {
+    SURFACE_1_STR_BC[i](0,0) = 1 ;
+    SURFACE_1_STR_BC[i](1,1) = 1 ;
+  }
 
 
+  for (int i = 0; i < SURFACE_2_MAT_DPSM_SOURCE.n_rows; ++i) {
+    SURFACE_2_STR_BC[i](0,0) = 1 ;
+    SURFACE_2_STR_BC[i](1,1) = 1 ;
+  }
 
   
     /*==================================================*/
    /*===============Transducer Modelling===============*/
   /*==================================================*/
+
+    /* Transucer Modelling 
 
   P_DTYPE STRESS_VAL_X = pow(10,6);
   P_DTYPE STRESS_VAL_Y = pow(10,6);
@@ -318,9 +337,9 @@ int main(){
     S_1_TD_P4_BC[i](1,1)=+STRESS_VAL_Y;
   }
 
-  /*=====================================================================*/
-  /* First Active Surface is Created  Commencing Creation on the Sencond*/
-  /*===================================================================*/
+  //=====================================================================
+  // First Active Surface is Created  Commencing Creation on the Sencond
+  //===================================================================
 
   
   Row<P_DTYPE> S_2_TD_P1_origin = {8*cm,8*cm,5*cm};
@@ -415,7 +434,7 @@ int main(){
     S_2_TD_P4_BC[i](1,1)=+STRESS_VAL_Y;
   }
 
-  /*====================================================*/
+  //====================================================
 
 
   
@@ -545,11 +564,10 @@ int main(){
 
   // Now We need to Combine All Active Sources
 
-  Mat<P_DTYPE> ACTIVE_SOURCES,ACTIVE_SOURCES_DPSM;
   Mat<P_DTYPE> SURFACE_1_MAT,SURFACE_2_MAT;
 
   cout << " Joining the Geometries" << endl;
-  /*Joining The Surface Parts */
+  //Joining The Surface Parts 
   
   SURFACE_1_MAT = join_cols(S_1_TD_P1_MAT, S_1_TD_P2_MAT);
   SURFACE_1_MAT = join_cols(SURFACE_1_MAT, S_1_TD_P3_MAT);
@@ -572,6 +590,11 @@ int main(){
   SURFACE_2_MAT = join_cols(SURFACE_2_MAT, S_2_P4_MAT);
  // Combining All the Surfaces
 
+  End  Transucer Modelling */
+
+  Mat<P_DTYPE> ACTIVE_SOURCES,ACTIVE_SOURCES_DPSM;
+
+
   ACTIVE_SOURCES = join_cols(SURFACE_1_MAT,SURFACE_2_MAT);
   ACTIVE_SOURCES = join_cols(ACTIVE_SOURCES,SURFACE_3_MAT);
   ACTIVE_SOURCES = join_cols(ACTIVE_SOURCES,SURFACE_4_MAT);
@@ -579,15 +602,15 @@ int main(){
   ACTIVE_SOURCES = join_cols(ACTIVE_SOURCES,SURFACE_6_MAT);
 
     /*Joining The Surface Parts of DPSM*/
-  Row<P_DTYPE>S_1_normal = {0,0,1};
-  Row<P_DTYPE>S_1_normal_reverse = {0,0,-1};
-  Row<P_DTYPE>S_2_normal = {0,0,-1};
-  Row<P_DTYPE>S_2_normal_reverse = {0,0,1};
+  // Row<P_DTYPE>S_1_normal = {0,0,1};
+  // Row<P_DTYPE>S_1_normal_reverse = {0,0,-1};
+  // Row<P_DTYPE>S_2_normal = {0,0,-1};
+  // Row<P_DTYPE>S_2_normal_reverse = {0,0,1};
 
 
-  cout << "Creating the DPSM for Split Geometries" << endl;
-  Mat<P_DTYPE> SURFACE_1_MAT_DPSM_SOURCE = source_point_placer<P_DTYPE>(SURFACE_1_MAT, S_1_normal_reverse, r_s_tran);
-  Mat<P_DTYPE> SURFACE_2_MAT_DPSM_SOURCE = source_point_placer<P_DTYPE>(SURFACE_2_MAT, S_2_normal_reverse, r_s_tran);
+  // cout << "Creating the DPSM for Split Geometries" << endl;
+  // Mat<P_DTYPE> SURFACE_1_MAT_DPSM_SOURCE = source_point_placer<P_DTYPE>(SURFACE_1_MAT, S_1_normal_reverse, r_s_tran);
+  // Mat<P_DTYPE> SURFACE_2_MAT_DPSM_SOURCE = source_point_placer<P_DTYPE>(SURFACE_2_MAT, S_2_normal_reverse, r_s_tran);
 
   // Combining the DPSM
   
@@ -602,32 +625,32 @@ int main(){
 
   
     /*Joining The Surface Parts */
-  cx_3d<P_DTYPE> SURFACE_1_STR_BC,SURFACE_2_STR_BC;
+  // cx_3d<P_DTYPE> SURFACE_1_STR_BC,SURFACE_2_STR_BC;
 
   
-  SURFACE_1_STR_BC = join_cx_3d(S_1_TD_P1_BC, S_1_TD_P2_BC);
-  SURFACE_1_STR_BC = join_cx_3d(SURFACE_1_STR_BC, S_1_TD_P3_BC);
-  SURFACE_1_STR_BC = join_cx_3d(SURFACE_1_STR_BC, S_1_TD_P4_BC);
+  // SURFACE_1_STR_BC = join_cx_3d(S_1_TD_P1_BC, S_1_TD_P2_BC);
+  // SURFACE_1_STR_BC = join_cx_3d(SURFACE_1_STR_BC, S_1_TD_P3_BC);
+  // SURFACE_1_STR_BC = join_cx_3d(SURFACE_1_STR_BC, S_1_TD_P4_BC);
 
-  SURFACE_1_STR_BC = join_cx_3d(SURFACE_1_STR_BC, S_1_P1_BC);
-  SURFACE_1_STR_BC = join_cx_3d(SURFACE_1_STR_BC, S_1_P2_BC);
-  SURFACE_1_STR_BC = join_cx_3d(SURFACE_1_STR_BC, S_1_P3_BC);
-  SURFACE_1_STR_BC = join_cx_3d(SURFACE_1_STR_BC, S_1_P4_BC);
+  // SURFACE_1_STR_BC = join_cx_3d(SURFACE_1_STR_BC, S_1_P1_BC);
+  // SURFACE_1_STR_BC = join_cx_3d(SURFACE_1_STR_BC, S_1_P2_BC);
+  // SURFACE_1_STR_BC = join_cx_3d(SURFACE_1_STR_BC, S_1_P3_BC);
+  // SURFACE_1_STR_BC = join_cx_3d(SURFACE_1_STR_BC, S_1_P4_BC);
 
 
 
   // Combining All the Surface DPSM Sources
 
   
-  /* Similarly For Surface 2 */
-  SURFACE_2_STR_BC = join_cx_3d(S_2_TD_P1_BC, S_2_TD_P2_BC);
-  SURFACE_2_STR_BC = join_cx_3d(SURFACE_2_STR_BC, S_2_TD_P3_BC);
-  SURFACE_2_STR_BC = join_cx_3d(SURFACE_2_STR_BC, S_2_TD_P4_BC);
+  // /* Similarly For Surface 2 */
+  // SURFACE_2_STR_BC = join_cx_3d(S_2_TD_P1_BC, S_2_TD_P2_BC);
+  // SURFACE_2_STR_BC = join_cx_3d(SURFACE_2_STR_BC, S_2_TD_P3_BC);
+  // SURFACE_2_STR_BC = join_cx_3d(SURFACE_2_STR_BC, S_2_TD_P4_BC);
 
-  SURFACE_2_STR_BC = join_cx_3d(SURFACE_2_STR_BC, S_2_P1_BC);
-  SURFACE_2_STR_BC = join_cx_3d(SURFACE_2_STR_BC, S_2_P2_BC);
-  SURFACE_2_STR_BC = join_cx_3d(SURFACE_2_STR_BC, S_2_P3_BC);
-  SURFACE_2_STR_BC = join_cx_3d(SURFACE_2_STR_BC, S_2_P4_BC);
+  // SURFACE_2_STR_BC = join_cx_3d(SURFACE_2_STR_BC, S_2_P1_BC);
+  // SURFACE_2_STR_BC = join_cx_3d(SURFACE_2_STR_BC, S_2_P2_BC);
+  // SURFACE_2_STR_BC = join_cx_3d(SURFACE_2_STR_BC, S_2_P3_BC);
+  // SURFACE_2_STR_BC = join_cx_3d(SURFACE_2_STR_BC, S_2_P4_BC);
 
   cx_3d<P_DTYPE> ACTIVE_STRESS_BC;
   ACTIVE_STRESS_BC = join_cx_3d<P_DTYPE>(SURFACE_1_STR_BC,SURFACE_2_STR_BC);
@@ -641,7 +664,9 @@ int main(){
   // Mat<complex<P_DTYPE>> Result =  get_strength_hetro(Mat<T> source_point_list,Mat<T> passive_source_list ,T r_s, Row<T> direction_cosine,cx_3d<T> stress_matrix,T k_s,T k_p,T rho , T omega,T mu,T lamda,bool have_active_sources)
   ACTIVE_SOURCES.save("DBUG_TIME_ACTIVE.csv",csv_ascii);
   ACTIVE_SOURCES_DPSM.save("DBUG_TIME_ACTIVE_DPSM.csv",csv_ascii);
+  
   cout << ACTIVE_STRESS_BC.size() << "-------" << ACTIVE_SOURCES_DPSM.n_rows << endl;
+  
   Mat<P_DTYPE> PASS_SOURCES(0,0,fill::zeros);
   
   Mat<complex<P_DTYPE>> Result =  solve_dpsm_str<P_DTYPE>(ACTIVE_SOURCES_DPSM,PASS_SOURCES,ACTIVE_STRESS_BC,ACTIVE_SOURCES,k_s_aluminium,k_p_aluminium,rho_al,omega_trans,mu_al,lamda_al);
@@ -651,5 +676,8 @@ int main(){
 
   // cx_3d<P_DTYPE> DBUG_Stress_Result = stress_from_points<P_DTYPE>(ACTIVE_SOURCES_DPSM ,Result , Observation_point ,k_s_aluminium,k_p_aluminium,rho_al,omega_trans,lamda_al,mu_al);
   // int Sucess = save_cx_3d<complex<P_DTYPE>>(DBUG_Stress_Result,"./");
+
+  cx_3d<P_DTYPE> Stress_CALC_ON_ACTIVE = stress_calc_3d_ver<P_DTYPE>(ACTIVE_SOURCES_DPSM, ACTIVE_SOURCES,Result, k_s_aluminium,k_p_aluminium,rho_al,omega_trans,mu_al,lamda_al);
+  int Sucess = save_cx_3d<complex<P_DTYPE>>(Stress_CALC_ON_ACTIVE,"./");
   cout << "Sucess Reading " << endl;	
  }

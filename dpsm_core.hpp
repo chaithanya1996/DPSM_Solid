@@ -131,3 +131,10 @@ Mat<complex<T>> EQN_assembler (const Mat<T> &ACTIVE_SOURCES_DPSM_POINT, const Ma
 
 template <typename T>
 Mat<complex<T>> solve_dpsm_str (const Mat<T> & ACTIVE_SOURCES_DPSM_POINT,const Mat<T> & PASSIVE_SOURCES_DPSM_POINT, cx_3d<T> STRESS_CX_3D_MATRIX , const Mat<T> & Points_of_enforcement, T k_s,T k_p,T rho , T omega,T mu,T lamda);
+
+template <typename T>
+Mat<complex<T>> stress_calc_mat_ver(const Mat<T> &ACTIVE_SOURCES_DPSM_POINT, const Mat<T> &Points_of_enforcement, const Mat<complex<T>> &ACTIVE_STR , T k_s,T k_p,T rho , T omega,T mu,T lamda);
+
+template <typename T>
+cx_3d<T> stress_calc_3d_ver(const Mat<T> &ACTIVE_SOURCES_DPSM_POINT, const Mat<T> &Points_of_enforcement, const Mat<complex<T>> &ACTIVE_STR , T k_s,T k_p,T rho , T omega,T mu,T lamda);
+
