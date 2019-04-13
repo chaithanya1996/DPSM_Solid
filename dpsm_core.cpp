@@ -617,8 +617,8 @@ Mat<complex<T>> solve_dpsm_str (const Mat<T> & ACTIVE_SOURCES_DPSM_POINT,const M
   }
 
   cout << "Started Writing To Disk " << endl;
-  EQN_MAT_assembled.save("DBUG_A_MATRIX.csv",csv_ascii);
-  STRESS_Col_ENFORCER.save("DBUG_B_MATRIX.csv",csv_ascii);
+  //EQN_MAT_assembled.save("DBUG_A_MATRIX.csv",csv_ascii);
+  //STRESS_Col_ENFORCER.save("DBUG_B_MATRIX.csv",csv_ascii);
     cout << "Completed Writing To Disk " << endl;
   
   cout << "Starting Solving Linear Equations" << endl;
@@ -660,7 +660,7 @@ cx_3d<T> stress_calc_3d_ver(const Mat<T> &ACTIVE_SOURCES_DPSM_POINT, const Mat<T
   for (int i = 0; i < ACTIVE_STR.n_rows; ++i) {
     ACTIVE_STR_COL(span(i*3,i*3+2)) = trans(ACTIVE_STR.row(i));
   }
-  Col<complex<T>> stress_vals = EQN_MAT * ACTIVE_STR;
+  Col<complex<T>> stress_vals = EQN_MAT * ACTIVE_STR_COL;
   cx_3d<T> stress_vals_cx(stress_vals.n_elem/9,Mat<complex<T>>(3,3,fill::zeros));
   #pragma omp parallel for
   for (int i = 0; i < stress_vals_cx.size(); ++i) {
