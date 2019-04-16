@@ -55,3 +55,15 @@ Mat<T> source_point_placer(Mat<T> source_location_mat, Row<T> normal_location, T
 
 template <typename T>
 int save_cx_3d(std::vector<Mat<T>> mat_to_be_saved, const std::string &PATH_TO_SAVE);
+
+template <typename T>
+Mat<T> CUBE_EXTRACT(Cube<T> incoming_tube,int row_no_ex){
+    Mat<T> Extracnted(3,3,fill::zeros);
+    for (int i = 0; i < 3; ++i) {
+        for (int j = 0; j < 3; ++j) {
+            Extracnted(i,j) = incoming_tube(row_no_ex,j,i);
+        }
+    }
+    return Extracnted;
+};
+
