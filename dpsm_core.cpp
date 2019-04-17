@@ -571,7 +571,7 @@ EQN_ROW(const Mat<T> &ACTIVE_SOURCES_DPSM_POINT, Row<T> Points_of_enforcement, T
   for (int i= 0; i < no_active_points; ++i) {
     Cube<complex<T>> G_Cube = S_coff_source_target<T>(ACTIVE_SOURCES_DPSM_POINT.row(i), Points_of_enforcement, k_s ,  k_p, rho ,  omega, lamda, mu);
     for (int j = 0; j < 3; ++j) {
-      Mat<complex<T>> TEMP_MAT_EXTRACT = CUBE_EXTRACT(G_Cube,j)
+      Mat<complex<T>> TEMP_MAT_EXTRACT = CUBE_EXTRACT(G_Cube,j);
       EQN_MAT(span(j*3,j*3+2),span(i*3,i*3+2)) = TEMP_MAT_EXTRACT;
     }
   }

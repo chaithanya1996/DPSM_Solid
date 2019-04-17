@@ -220,14 +220,14 @@ int main(){
 
   
   for (int i = 0; i < SURFACE_1_MAT_DPSM_SOURCE.n_rows; ++i) {
-    SURFACE_1_STR_BC[i](0,0) = 1 ;
-    SURFACE_1_STR_BC[i](1,1) = 1 ;
+    SURFACE_1_STR_BC[i](2,0) = 1 ;
+    SURFACE_1_STR_BC[i](2,1) = 1 ;
   }
 
 
   for (int i = 0; i < SURFACE_2_MAT_DPSM_SOURCE.n_rows; ++i) {
-    SURFACE_2_STR_BC[i](0,0) = 1 ;
-    SURFACE_2_STR_BC[i](1,1) = 1 ;
+    SURFACE_2_STR_BC[i](2,0) = 1 ;
+    SURFACE_2_STR_BC[i](2,1) = 1 ;
   }
 
   
