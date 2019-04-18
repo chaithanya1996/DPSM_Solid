@@ -282,6 +282,7 @@ int main(){
   
   //Mat<complex<P_DTYPE>> Result = EQN_assembler_DISP(Source_Mat,Target_plane ,k_s_aluminium ,k_p_aluminium,rho_al ,omega_trans);
   Mat<complex<P_DTYPE>> Result =  solve_dpsm_disp<P_DTYPE>(ACTIVE_SOURCES_DPSM,PASS_SOURCES,ACTIVE_STRESS_BC,ACTIVE_SOURCES,k_s_aluminium,k_p_aluminium,rho_al,omega_trans);
-  
+  Mat<complex<P_DTYPE>> DISP_Stress_CALC_ON_ACTIVE = disp_calc_3d_ver<P_DTYPE>(ACTIVE_SOURCES_DPSM, ACTIVE_SOURCES,Result, k_s_aluminium,k_p_aluminium,rho_al,omega_trans);
+ 
   // cout << Result << endl;
  }
