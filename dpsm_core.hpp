@@ -1,3 +1,4 @@
+
 #include "dpsm_helpers.hpp"
 
 template <typename TYPE>
@@ -673,6 +674,7 @@ Mat<complex<T>> solve_dpsm_disp (const Mat<T> & ACTIVE_SOURCES_DPSM_POINT,const 
   
   Mat<complex<T>> SOLID_STR_MAT(solid_point_strength_colvec.n_elem/ 3,3,fill::zeros) ;
   cout << "Started Ctrating STR_MAT" << endl;
+  
   for (int i = 0; i < SOLID_STR_MAT.n_rows; ++i) {
     Row<complex<T>> temp_rowvec =trans(solid_point_strength_colvec(span(i*3,i*3+2)));
     SOLID_STR_MAT.row(i) = temp_rowvec;
@@ -681,3 +683,19 @@ Mat<complex<T>> solve_dpsm_disp (const Mat<T> & ACTIVE_SOURCES_DPSM_POINT,const 
   return(SOLID_STR_MAT);
 }
 
+template <typename T>
+Mat<T> disp_calc_3d_ver(const Mat<T> &ACTIVE_SOURCES_DPSM_POINT, const Mat<T> &Points_of_enforcement, const Mat<complex<T>> &ACTIVE_STR , T k_s,T k_p,T rho , T omega){
+  Mat<complex<T>> EQN_MAT  = EQN_assembler_DISP(ACTIVE_SOURCES_DPSM_POINT,Points_of_enforcement,k_s,k_p, rho ,omega);
+  Col<complex<T>> ACTIVE_STR_COL(ACTIVE_STR.n_elem,fill::zeros);
+  #pragma omp parallel for
+  for (int i = 0; i < ACTIVE_STR.n_rows; ++i) {
+    ACTIVE_STR_COL(span(i*3,i*3+2)) = trans(ACTIVE_STR.row(i));
+  }
+  Col<complex<T>> stress_vals = EQN_MAT * ACTIVE_STR_COL;
+  Mat<complex<T>> stress_vals_cx(stress_vals.n_elem/3,Mat<complex<T>>(3,3,fill::zeros));
+  #pragma omp parallel for
+  for (int i = 0; i < stress_vals_cx.n_rows; ++i) {
+    stress_vals_cx.row(i) = stress_vals(span(i*3,i*3+2));
+  }
+  return(stress_vals_cx);
+}

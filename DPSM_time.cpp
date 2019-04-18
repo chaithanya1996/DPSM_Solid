@@ -67,11 +67,11 @@ inline TYPE calc_mu (TYPE E, TYPE V ){
 int main(){
 
   // Controlling Parameters For OpenMP
-  omp_set_num_threads(8);
+  omp_set_num_threads(16);
 
 
    
-  using P_DTYPE = float;  // Defining the Precision of the Computation
+  using P_DTYPE = double;  // Defining the Precision of the Computation
   
    // Defining Parameters (work in progress)
   P_DTYPE mm = 0.001;
@@ -220,14 +220,14 @@ int main(){
 
   
   for (int i = 0; i < SURFACE_1_MAT_DPSM_SOURCE.n_rows; ++i) {
-    SURFACE_1_STR_BC[i](2,0) = 1 ;
-    SURFACE_1_STR_BC[i](2,1) = 1 ;
+    SURFACE_1_STR_BC[i](2,0) = GPa ;
+    SURFACE_1_STR_BC[i](2,1) = GPa ;
   }
 
 
   for (int i = 0; i < SURFACE_2_MAT_DPSM_SOURCE.n_rows; ++i) {
-    SURFACE_2_STR_BC[i](2,0) = 1 ;
-    SURFACE_2_STR_BC[i](2,1) = 1 ;
+    SURFACE_2_STR_BC[i](2,0) = GPa ;
+    SURFACE_2_STR_BC[i](2,1) = GPa ;
   }
 
   
