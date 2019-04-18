@@ -73,7 +73,7 @@ int main(){
 
 
    
-  using P_DTYPE = float;  // Defining the Precision of the Computation
+  using P_DTYPE = double;  // Defining the Precision of the Computation
   
    // Defining Parameters (work in progress)
   P_DTYPE mm = 0.001;
@@ -214,23 +214,23 @@ int main(){
 
   // Defining the Stress Coniditons
   
-  Mat<complex<P_DTYPE>> SURFACE_1_STR_BC(SURFACE_1_MAT.n_rows,3,fill::zeros);
-  Mat<complex<P_DTYPE>> SURFACE_2_STR_BC(SURFACE_2_MAT.n_rows,3,fill::zeros);
+  Mat<complex<P_DTYPE>> SURFACE_1_STR_BC(SURFACE_1_MAT.n_rows,3,fill::ones);
+  Mat<complex<P_DTYPE>> SURFACE_2_STR_BC(SURFACE_2_MAT.n_rows,3,fill::ones);
   Mat<complex<P_DTYPE>> SURFACE_3_STR_BC(SURFACE_3_MAT.n_rows,3,fill::zeros);
   Mat<complex<P_DTYPE>> SURFACE_4_STR_BC(SURFACE_4_MAT.n_rows,3,fill::zeros);
   Mat<complex<P_DTYPE>> SURFACE_5_STR_BC(SURFACE_5_MAT.n_rows,3,fill::zeros);
   Mat<complex<P_DTYPE>> SURFACE_6_STR_BC(SURFACE_6_MAT.n_rows,3,fill::zeros);
 
   
-  for (int i = 0; i < SURFACE_1_STR_BC.n_rows; ++i) {
-      SURFACE_1_STR_BC(i,0) = 1 ;
-      SURFACE_1_STR_BC(i,1) = 1 ;
-  }
+ //  for (int i = 0; i < SURFACE_1_STR_BC.n_rows; ++i) {
+ //      SURFACE_1_STR_BC(i,0) = 1 ;
+ //      SURFACE_1_STR_BC(i,1) = 1 ;
+ //  }
 
-  for (int i = 0; i < SURFACE_2_STR_BC.n_rows; ++i) {
-     SURFACE_2_STR_BC(i,0) = 1 ;
-     SURFACE_2_STR_BC(i,1) = 1 ;
- }
+ //  for (int i = 0; i < SURFACE_2_STR_BC.n_rows; ++i) {
+ //     SURFACE_2_STR_BC(i,0) = 1 ;
+ //     SURFACE_2_STR_BC(i,1) = 1 ;
+ // }
 
   cout << " Start Stiching" << endl;
   
