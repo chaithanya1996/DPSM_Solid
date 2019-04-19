@@ -221,7 +221,8 @@ int main(){
   Mat<complex<P_DTYPE>> SURFACE_5_STR_BC(SURFACE_5_MAT.n_rows,3,fill::zeros);
   Mat<complex<P_DTYPE>> SURFACE_6_STR_BC(SURFACE_6_MAT.n_rows,3,fill::zeros);
 
-  
+  SURFACE_1_STR_BC = SURFACE_1_STR_BC * 0.001;
+  SURFACE_2_STR_BC = SURFACE_2_STR_BC * 0.001;  
  //  for (int i = 0; i < SURFACE_1_STR_BC.n_rows; ++i) {
  //      SURFACE_1_STR_BC(i,0) = 1 ;
  //      SURFACE_1_STR_BC(i,1) = 1 ;
@@ -283,6 +284,6 @@ int main(){
   //Mat<complex<P_DTYPE>> Result = EQN_assembler_DISP(Source_Mat,Target_plane ,k_s_aluminium ,k_p_aluminium,rho_al ,omega_trans);
   Mat<complex<P_DTYPE>> Result =  solve_dpsm_disp<P_DTYPE>(ACTIVE_SOURCES_DPSM,PASS_SOURCES,ACTIVE_STRESS_BC,ACTIVE_SOURCES,k_s_aluminium,k_p_aluminium,rho_al,omega_trans);
   Mat<complex<P_DTYPE>> DISP_Stress_CALC_ON_ACTIVE = disp_calc_3d_ver<P_DTYPE>(ACTIVE_SOURCES_DPSM, ACTIVE_SOURCES,Result, k_s_aluminium,k_p_aluminium,rho_al,omega_trans);
- 
+  DISP_Stress_CALC_ON_ACTIVE.save("DBUG_DISP.csv",csv_ascii);
   // cout << Result << endl;
  }

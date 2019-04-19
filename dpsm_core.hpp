@@ -545,7 +545,7 @@ template Mat<complex<double>> EQN_assembler (const Mat<double> &,const Mat<doubl
 
 
 template <typename T>
-Mat<complex<T>> solve_dpsm_str (const Mat<T> & ACTIVE_SOURCES_DPSM_POINT,const Mat<T> & PASSIVE_SOURCES_DPSM_POINT, cx_3d<T> STRESS_CX_3D_MATRIX , const Mat<T> & Points_of_enforcement, T k_s,T k_p,T rho , T omega,T mu,T lamda){
+Mat<complex<T>> solve_dpsm_str (const Mat<T> & ACTIVE_SOURCES_DPSM_POINT,const Mat<T> & PASSIVE_SOURCES_DPSM_POINT, cx_3d<T> STRESS_CX_3D_MATRIX , const Mat<T> & Points_of_enforcement, T k_s,T k_p,T rho , T omega,T mu,T lamda,bool DBUG_STATUS=false){
   
   Mat<T> TOTAL_SOURCES_DPSM_MAT = join_cols(ACTIVE_SOURCES_DPSM_POINT,PASSIVE_SOURCES_DPSM_POINT);
   Mat<complex<T>> EQN_MAT_assembled = EQN_assembler(TOTAL_SOURCES_DPSM_MAT,Points_of_enforcement,k_s,k_p, rho ,omega,mu, lamda);
@@ -562,12 +562,12 @@ Mat<complex<T>> solve_dpsm_str (const Mat<T> & ACTIVE_SOURCES_DPSM_POINT,const M
       STRESS_Col_ENFORCER(span(i*9+j*3,i*9+j*3+2)) = STRESS_CX_3D_MATRIX[i].col(j);
     }
   }
-
-  cout << "Started Writing To Disk " << endl;
-  EQN_MAT_assembled.save("DBUG_A_MATRIX.csv",csv_ascii);
-  STRESS_Col_ENFORCER.save("DBUG_B_MATRIX.csv",csv_ascii);
+  if(DBUG_STATUS){
+    cout << "Started Writing To Disk " << endl;
+    EQN_MAT_assembled.save("DBUG_Giii_A_MATRIX.csv",csv_ascii);
+    STRESS_Col_ENFORCER.save("DBUG_Giii_B_MATRIX.csv",csv_ascii);
     cout << "Completed Writing To Disk " << endl;
-  
+  }
   cout << "Starting Solving Linear Equations" << endl;
   Col<complex<T>> solid_point_strength_colvec = solve(EQN_MAT_assembled,STRESS_Col_ENFORCER);
   cout << "Completed Solving Linear Equations" << endl;
@@ -646,7 +646,7 @@ Mat<complex<T>> EQN_assembler_DISP (const Mat<T> &ACTIVE_SOURCES_DPSM_POINT, con
 
 
 template <typename T>
-Mat<complex<T>> solve_dpsm_disp (const Mat<T> & ACTIVE_SOURCES_DPSM_POINT,const Mat<T> & PASSIVE_SOURCES_DPSM_POINT, Mat<complex<T>> disp_mat , const Mat<T> & Points_of_enforcement, T k_s,T k_p,T rho , T omega){
+Mat<complex<T>> solve_dpsm_disp (const Mat<T> & ACTIVE_SOURCES_DPSM_POINT,const Mat<T> & PASSIVE_SOURCES_DPSM_POINT, Mat<complex<T>> disp_mat , const Mat<T> & Points_of_enforcement, T k_s,T k_p,T rho , T omega,bool DBUG_STATUS=false){
   
   Mat<T> TOTAL_SOURCES_DPSM_MAT = join_cols(ACTIVE_SOURCES_DPSM_POINT,PASSIVE_SOURCES_DPSM_POINT);
   Mat<complex<T>> EQN_MAT_assembled = EQN_assembler_DISP(TOTAL_SOURCES_DPSM_MAT,Points_of_enforcement,k_s,k_p, rho ,omega);
@@ -661,11 +661,12 @@ Mat<complex<T>> solve_dpsm_disp (const Mat<T> & ACTIVE_SOURCES_DPSM_POINT,const 
     STRESS_Col_ENFORCER(span(i*3,i*3+2)) = trans(disp_mat.row(i));
   }
 
-  cout << "Started Writing To Disk " << endl;
-  EQN_MAT_assembled.save("DBUG_A_MATRIX.csv",csv_ascii);
-  STRESS_Col_ENFORCER.save("DBUG_B_MATRIX.csv",csv_ascii);
-  cout << "Completed Writing To Disk " << endl;
-  
+  if(DBUG_STATUS){
+    cout << "Started Writing To Disk " << endl;
+    EQN_MAT_assembled.save("DBUG_A_MATRIX.csv",csv_ascii);
+    STRESS_Col_ENFORCER.save("DBUG_B_MATRIX.csv",csv_ascii);
+    cout << "Completed Writing To Disk " << endl;
+  }
   cout << "Starting Solving Linear Equations" << endl;
   Col<complex<T>> solid_point_strength_colvec = solve(EQN_MAT_assembled,STRESS_Col_ENFORCER);
   cout << "Completed Solving Linear Equations" << endl;
@@ -695,7 +696,7 @@ Mat<complex<T>> disp_calc_3d_ver(const Mat<T> &ACTIVE_SOURCES_DPSM_POINT, const 
   Mat<complex<T>> Disp_vals_cx(disp_vals_cal.n_elem/3,3);
   #pragma omp parallel for
   for (int i = 0; i < Disp_vals_cx.n_rows; ++i) {
-    Disp_vals_cx.row(i) = disp_vals_cal(span(i*3,i*3+2));
+    Disp_vals_cx.row(i) = trans(disp_vals_cal(span(i*3,i*3+2)));
   }
   return(Disp_vals_cx);
 }
