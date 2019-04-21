@@ -221,8 +221,8 @@ int main(){
   Mat<complex<P_DTYPE>> SURFACE_5_STR_BC(SURFACE_5_MAT.n_rows,3,fill::zeros);
   Mat<complex<P_DTYPE>> SURFACE_6_STR_BC(SURFACE_6_MAT.n_rows,3,fill::zeros);
 
-  SURFACE_1_STR_BC = SURFACE_1_STR_BC * 0.001;
-  SURFACE_2_STR_BC = SURFACE_2_STR_BC * 0.001;  
+  SURFACE_1_STR_BC = SURFACE_1_STR_BC * 0.00001;
+  SURFACE_2_STR_BC = SURFACE_2_STR_BC * 0.00001;  
  //  for (int i = 0; i < SURFACE_1_STR_BC.n_rows; ++i) {
  //      SURFACE_1_STR_BC(i,0) = 1 ;
  //      SURFACE_1_STR_BC(i,1) = 1 ;
@@ -283,7 +283,39 @@ int main(){
   
   //Mat<complex<P_DTYPE>> Result = EQN_assembler_DISP(Source_Mat,Target_plane ,k_s_aluminium ,k_p_aluminium,rho_al ,omega_trans);
   Mat<complex<P_DTYPE>> Result =  solve_dpsm_disp<P_DTYPE>(ACTIVE_SOURCES_DPSM,PASS_SOURCES,ACTIVE_STRESS_BC,ACTIVE_SOURCES,k_s_aluminium,k_p_aluminium,rho_al,omega_trans);
-  Mat<complex<P_DTYPE>> DISP_Stress_CALC_ON_ACTIVE = disp_calc_3d_ver<P_DTYPE>(ACTIVE_SOURCES_DPSM, ACTIVE_SOURCES,Result, k_s_aluminium,k_p_aluminium,rho_al,omega_trans);
-  DISP_Stress_CALC_ON_ACTIVE.save("DBUG_DISP.csv",csv_ascii);
+
+  // Area of Observation
+  
+  Row<P_DTYPE> S_OBS_origin = {10*cm,0,0};
+  Row<P_DTYPE> S_OBS_vec_x = {10*cm,20*cm,0};
+  Row<P_DTYPE> S_OBS_vec_y = {10*cm,0,5*cm};
+  
+  int S_OBS_X_DIVS = vec_mag<P_DTYPE>(S_OBS_vec_x - S_OBS_origin)/r_s_tran;
+  int S_OBS_Y_DIVS = vec_mag<P_DTYPE>(S_OBS_vec_y - S_OBS_origin)/r_s_tran;
+  Row<P_DTYPE> S_OBS_normal = {1,0,0};
+  Row<P_DTYPE> S_OBS_normal_reverse = {-1,0,0};
+
+
+  
+  // Generating the Surfaces
+  
+  Mat<P_DTYPE> SURFACE_OBS_MAT =  rectangle_generator<P_DTYPE>( S_OBS_vec_x, S_OBS_vec_y, S_OBS_origin ,S_OBS_X_DIVS, S_OBS_Y_DIVS);
+
+  Mat<complex<P_DTYPE>> DISP_OBS_CAL = disp_calc_3d_ver<P_DTYPE>(ACTIVE_SOURCES_DPSM, SURFACE_OBS_MAT,Result, k_s_aluminium,k_p_aluminium,rho_al,omega_trans);
+  Mat<P_DTYPE> DISP_OBS_CAL_ABS = abs(DISP_OBS_CAL);
+  DISP_OBS_CAL_ABS.save("OBS_DISP.csv",csv_ascii);
+
+  cx_3d<P_DTYPE> DISP_OBS_CAL_stress = stress_calc_3d_ver<P_DTYPE>(ACTIVE_SOURCES_DPSM, SURFACE_OBS_MAT,Result, k_s_aluminium,k_p_aluminium,rho_al,omega_trans,mu_al,lamda_al);
+  vector<Mat<P_DTYPE>> DISP_OBS_CAL_stress_stress(DISP_OBS_CAL_stress.size(),Mat<P_DTYPE>(3,3));
+  for(size_t i = 0; i < DISP_OBS_CAL_stress.size(); i++)
+  {
+    DISP_OBS_CAL_stress_stress[i] = abs(DISP_OBS_CAL_stress[i]);
+  }
+  
+  save_cx_3d(DISP_OBS_CAL_stress_stress, "OBS_STRESS.csv");
+  
+  Mat<complex<P_DTYPE>> DISP__CALC_ON_ACTIVE = disp_calc_3d_ver<P_DTYPE>(ACTIVE_SOURCES_DPSM, ACTIVE_SOURCES,Result, k_s_aluminium,k_p_aluminium,rho_al,omega_trans);
+  Mat<P_DTYPE> ABS_DISP_ACTIVE =  abs(DISP__CALC_ON_ACTIVE);
+  ABS_DISP_ACTIVE.save("DBUG_ACTIVE_DISP.csv",csv_ascii);
   // cout << Result << endl;
  }
