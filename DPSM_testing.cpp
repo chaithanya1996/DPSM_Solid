@@ -108,8 +108,8 @@ int main(){
   P_DTYPE E_al = 69 * GPa, V_al = 0.334;
   P_DTYPE E_st = 200 * GPa, V_st = 0.305;
   
-  P_DTYPE lamda_al  = calc_lamda<P_DTYPE>(E_al,V_al);
-  P_DTYPE mu_al  = calc_mu<P_DTYPE>(E_al,V_al);
+  P_DTYPE lamda_al  = 61.17 * GPa;
+  P_DTYPE mu_al  = 26.45 * GPa;
   
   P_DTYPE lamda_st  = calc_lamda(E_st,V_st);
   P_DTYPE mu_st  = calc_mu(E_st,V_st);
@@ -125,7 +125,6 @@ int main(){
   // Transducer Properties in Aluminium
 
   P_DTYPE k_s_aluminium = omega_trans / c_al_swave  ;
-  
   P_DTYPE k_p_aluminium = omega_trans / c_al_pwave  ;
 
 
@@ -221,8 +220,8 @@ int main(){
   Mat<complex<P_DTYPE>> SURFACE_5_STR_BC(SURFACE_5_MAT.n_rows,3,fill::zeros);
   Mat<complex<P_DTYPE>> SURFACE_6_STR_BC(SURFACE_6_MAT.n_rows,3,fill::zeros);
 
-  SURFACE_1_STR_BC = SURFACE_1_STR_BC * 0.00001;
-  SURFACE_2_STR_BC = SURFACE_2_STR_BC * 0.00001;  
+  SURFACE_1_STR_BC = SURFACE_1_STR_BC * r_s_tran * 0.00001;
+  SURFACE_2_STR_BC = SURFACE_2_STR_BC * r_s_tran * 0.00001;  
  //  for (int i = 0; i < SURFACE_1_STR_BC.n_rows; ++i) {
  //      SURFACE_1_STR_BC(i,0) = 1 ;
  //      SURFACE_1_STR_BC(i,1) = 1 ;
@@ -283,7 +282,7 @@ int main(){
   
   //Mat<complex<P_DTYPE>> Result = EQN_assembler_DISP(Source_Mat,Target_plane ,k_s_aluminium ,k_p_aluminium,rho_al ,omega_trans);
   Mat<complex<P_DTYPE>> Result =  solve_dpsm_disp<P_DTYPE>(ACTIVE_SOURCES_DPSM,PASS_SOURCES,ACTIVE_STRESS_BC,ACTIVE_SOURCES,k_s_aluminium,k_p_aluminium,rho_al,omega_trans);
-
+  Result.save("D_BUG_Result.csv",csv_ascii);
   // Area of Observation
   
   Row<P_DTYPE> S_OBS_origin = {10*cm,0,0};
@@ -299,8 +298,8 @@ int main(){
   
   // Generating the Surfaces
   
-  Mat<P_DTYPE> SURFACE_OBS_MAT =  rectangle_generator<P_DTYPE>( S_OBS_vec_x, S_OBS_vec_y, S_OBS_origin ,S_OBS_X_DIVS, S_OBS_Y_DIVS);
-
+  Mat<P_DTYPE> SURFACE_OBS_MAT =  rectangle_generator<P_DTYPE>( S_OBS_vec_x, S_OBS_vec_y, S_OBS_origin ,S_OBS_X_DIVS * 20, S_OBS_Y_DIVS*10);
+  SURFACE_OBS_MAT.save("OBS_SURFACE.csv",csv_ascii);
   Mat<complex<P_DTYPE>> DISP_OBS_CAL = disp_calc_3d_ver<P_DTYPE>(ACTIVE_SOURCES_DPSM, SURFACE_OBS_MAT,Result, k_s_aluminium,k_p_aluminium,rho_al,omega_trans);
   Mat<P_DTYPE> DISP_OBS_CAL_ABS = abs(DISP_OBS_CAL);
   DISP_OBS_CAL_ABS.save("OBS_DISP.csv",csv_ascii);

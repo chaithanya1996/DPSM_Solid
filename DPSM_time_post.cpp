@@ -34,23 +34,6 @@ using std::ofstream;
 
 
 
-
-// This function is not working in the header file
-
-
-template <typename T>
-cx_3d<T> join_cx_3d(cx_3d<T> former, cx_3d<T> latter){
-
-  // vector<Mat<complex<T>>> combined;
-  cx_3d<T> combined;
-  combined.reserve( former.size() + latter.size() ); // preallocate memory
-  combined.insert( combined.end(), former.begin(), former.end() );
-  combined.insert( combined.end(), latter.begin(), latter.end() );
-
- return(combined);
-}
-
-
 template <typename TYPE>
 inline TYPE calc_lamda(TYPE E, TYPE V ){
   return(E * V / (1+V) / (1-2*V));
@@ -61,18 +44,14 @@ inline TYPE calc_mu (TYPE E, TYPE V ){
   return(E / 2 /(1+V));
 }
 
-
 int main(){
+  
   // Controlling Parameters For OpenMP
-  omp_set_num_threads(8);
-  using P_DTYPE = float;  // Defining the Precision of the Computation.
-
-    // Controlling Parameters For OpenMP
   omp_set_num_threads(8);
 
 
    
-  using P_DTYPE = float;  // Defining the Precision of the Computation
+  using P_DTYPE = double;  // Defining the Precision of the Computation
   
    // Defining Parameters (work in progress)
   P_DTYPE mm = 0.001;
@@ -118,29 +97,37 @@ int main(){
    ----------------------------------*/
 
     // Transducer Properties
-  P_DTYPE trans_freq =  3000 * kHz;
+  P_DTYPE trans_freq =  50 * kHz;
   P_DTYPE omega_trans = 2 * M_PI * trans_freq ;
 
   // Transducer Properties in Aluminium
 
-  P_DTYPE k_s_aluminium = c_al_swave / omega_trans ;
-  P_DTYPE k_p_aluminium = c_al_pwave / omega_trans ;
+  P_DTYPE k_s_aluminium = omega_trans / c_al_swave  ;
+  
+  P_DTYPE k_p_aluminium = omega_trans / c_al_pwave  ;
 
 
   // calculating the r_s for given Transducer and Medium 
-  int r_s_trans_factor = 2;
+  int r_s_trans_factor = 5;
   P_DTYPE r_s_tran = r_s_calculator<P_DTYPE>(trans_freq,c_al,r_s_trans_factor);
   cout << " The Distance Between Transducer Source Points --" << r_s_tran << endl;
-  Mat<P_DTYPE> DBUG_TIME_ACTIVE,DBUG_TIME_ACTIVE_DPSM;
-  Mat<complex<P_DTYPE>> D_BUG_Result;
-  DBUG_TIME_ACTIVE.load("DBUG_TIME_ACTIVE.csv",csv_ascii);
-  DBUG_TIME_ACTIVE_DPSM.load("DBUG_TIME_ACTIVE_DPSM.csv",csv_ascii);
-  D_BUG_Result.load("D_BUG_Result.csv",csv_ascii);
-  Mat<P_DTYPE> Observation_point = {{10*cm,10*cm,0},{5*cm,5*cm,0}};
+  Row<P_DTYPE> source_point_r = {1,1,1};
+  Row<P_DTYPE> target_point_r = {2,2,2};
+  Cube<complex<P_DTYPE>> G_CUBE = G_diff_ijk_point(source_point_r,target_point_r,k_s_aluminium, k_p_aluminium,rho_al ,omega_trans);
+  cout <<  G_diff_ijk_point(source_point_r,target_point_r,k_s_aluminium, k_p_aluminium,rho_al ,omega_trans) << endl;
+  cout << "--------------------------------------------" << endl;
+  for (int j = 0; j < 3; ++j) {
+    cout <<  CUBE_EXTRACT(G_CUBE,j) << endl;
+  }
+  cout << "--------------------------------------------" << endl;
+  cout <<  stress_coff_point<P_DTYPE>(G_CUBE, lamda_al,mu_al) << endl;
 
-  cx_3d<P_DTYPE> DBUG_Stress_Result = stress_from_points<P_DTYPE>(DBUG_TIME_ACTIVE_DPSM ,D_BUG_Result , Observation_point ,k_s_aluminium,k_p_aluminium,rho_al,omega_trans,lamda_al,mu_al);
-  int Sucess = save_cx_3d<complex<P_DTYPE>>(DBUG_Stress_Result,"./");
-  cout << "Sucess Reading " << endl;			       
-  return 1 ;
-}
-  
+  Cube<complex<P_DTYPE>> G_CUB(3,3,3,fill::randu);
+  cout << "--------------------------------------------" << endl;
+  cout << G_CUB << endl;
+
+  cout << "--------------------------------------------" << endl;
+   for (int j = 0; j < 3; ++j) {
+    cout <<  CUBE_EXTRACT(G_CUB,j) << endl;
+  }
+}  

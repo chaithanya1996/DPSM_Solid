@@ -311,12 +311,12 @@ complex<T> G_p_ijk (Row<T> ijk_row_passed, Row<T> affect_point_this, Row<T> sour
   
   ijk_row =  ijk_row_passed ;
   T multiplier = 4 * M_PI *  rho * pow<T>(omega,2); 
-  complex<T> Gpiidi  = (e_p * ( pow<T>(k_p,2) *  eo_d_universal(ijk_row,R_vec,radius_mag) +
+  complex<T> Gpiidi  = (e_p * ( k_p * k_p *  eo_d_universal(ijk_row,R_vec,radius_mag) +
    ( G_ijk_helper(ijk_row) + 3 * R_vec[ijk_row[0]] * R_vec[ijk_row[1]]) * R_differ_mat(ijk_row[2],0) +  r_p * T (3) * eo_d_universal(ijk_row,R_vec,radius_mag)))/ multiplier +
-    G_place_holder[0] * (img_start * k_p * R_vec[ijk_row[2]] * e_p - R_vec[ijk_row[2]] * e_p / radius_mag);			 
+    G_place_holder(0) * (img_start * k_p * R_vec[ijk_row[2]] * e_p - R_vec[ijk_row[2]] * e_p / radius_mag);			 
 
-  complex<T> Gsiidi  = (e_s * ( -pow<T>(k_s,2) *  eo_d_universal(ijk_row,R_vec,radius_mag) -  ( G_ijk_helper(ijk_row) +3 * R_vec[ijk_row[0]] * R_vec[ijk_row[1]]) * R_differ_mat(ijk_row[2],0) +  r_s * T (3) * eo_d_universal(ijk_row,R_vec,radius_mag))) / multiplier +
-    G_place_holder[1] * (img_start * k_s * R_vec[ijk_row[2]] * e_s - R_vec[ijk_row[2]] * e_s / radius_mag);			 
+  complex<T> Gsiidi  = (e_s * ( -k_s* k_s *  eo_d_universal(ijk_row,R_vec,radius_mag) -  ( G_ijk_helper(ijk_row) +3 * R_vec[ijk_row[0]] * R_vec[ijk_row[1]]) * R_differ_mat(ijk_row[2],0) +  r_s * T (3) * eo_d_universal(ijk_row,R_vec,radius_mag))) / multiplier +
+    G_place_holder(1) * (img_start * k_s * R_vec[ijk_row[2]] * e_s - R_vec[ijk_row[2]] * e_s / radius_mag);			 
   
   return Gpiidi + Gsiidi ;
 }
