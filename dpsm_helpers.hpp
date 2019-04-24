@@ -230,7 +230,7 @@ int save_cx_3d(std::vector<Mat<T>> mat_to_be_saved, const std::string &PATH_TO_S
 #pragma omp single
 	for (int i = 0; i < size_of_cx_3d; ++i) {
 	  //outdata[k*3+j] << std::abs(mat_to_be_saved[i](0,0)) << endl;  
-    outdata[k*3+j] << mat_to_be_saved[i](0,0)<< endl;  
+    outdata[k*3+j] << mat_to_be_saved[i](k,j)<< endl;  
 	}
       }
     }

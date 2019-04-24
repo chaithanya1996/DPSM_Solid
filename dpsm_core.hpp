@@ -1,4 +1,5 @@
 
+
 #include "dpsm_helpers.hpp"
 
 template <typename TYPE>
@@ -540,12 +541,9 @@ Mat<complex<T>> EQN_assembler (const Mat<T> &ACTIVE_SOURCES_DPSM_POINT, const Ma
   return(A_COFF);
 }
 
-template Mat<complex<float>> EQN_assembler (const Mat<float>&, const Mat<float>&, float,float,float, float,float,float);
-template Mat<complex<double>> EQN_assembler (const Mat<double> &,const Mat<double>&, double,double,double, double,double,double);
-
 
 template <typename T>
-Mat<complex<T>> solve_dpsm_str (const Mat<T> & ACTIVE_SOURCES_DPSM_POINT,const Mat<T> & PASSIVE_SOURCES_DPSM_POINT, cx_3d<T> STRESS_CX_3D_MATRIX , const Mat<T> & Points_of_enforcement, T k_s,T k_p,T rho , T omega,T mu,T lamda,bool DBUG_STATUS=false){
+Mat<complex<T>> solve_dpsm_str (const Mat<T> & ACTIVE_SOURCES_DPSM_POINT,const Mat<T> & PASSIVE_SOURCES_DPSM_POINT, cx_3d<T> STRESS_CX_3D_MATRIX , const Mat<T> & Points_of_enforcement, T k_s,T k_p,T rho , T omega,T mu,T lamda,Mat<T> Points_of_enforcement_normal,bool DBUG_STATUS=false){
   
   Mat<T> TOTAL_SOURCES_DPSM_MAT = join_cols(ACTIVE_SOURCES_DPSM_POINT,PASSIVE_SOURCES_DPSM_POINT);
   Mat<complex<T>> EQN_MAT_assembled = EQN_assembler(TOTAL_SOURCES_DPSM_MAT,Points_of_enforcement,k_s,k_p, rho ,omega,mu, lamda);
@@ -554,7 +552,6 @@ Mat<complex<T>> solve_dpsm_str (const Mat<T> & ACTIVE_SOURCES_DPSM_POINT,const M
     cout << " NAN Detedted" << endl;
   }
   Col<complex<T>> STRESS_Col_ENFORCER(STRESS_CX_3D_MATRIX.size() * 9,fill::zeros);
-
   
   #pragma omp parallel for
   for (int i = 0; i < STRESS_CX_3D_MATRIX.size() ; ++i) {
@@ -568,6 +565,24 @@ Mat<complex<T>> solve_dpsm_str (const Mat<T> & ACTIVE_SOURCES_DPSM_POINT,const M
     STRESS_Col_ENFORCER.save("DBUG_Giii_B_MATRIX.csv",csv_ascii);
     cout << "Completed Writing To Disk " << endl;
   }
+  cout << "lapa" << endl;
+  Mat<complex<T>> EQN_MAT_refine(STRESS_CX_3D_MATRIX.size()*3,ACTIVE_SOURCES_DPSM_POINT.n_rows * 3,fill::zeros);
+  
+  for (int i=0; i < Points_of_enforcement.n_rows; ++i) {
+    int counter;
+    if ((Points_of_enforcement_normal(i,0)==1) || Points_of_enforcement_normal(i,0)== -1) {
+      counter = 0;
+    }
+    if (Points_of_enforcement_normal(i,1)==1 || Points_of_enforcement_normal(i,1)== -1) {
+      counter = 1;
+    }
+    if (Points_of_enforcement_normal(i,2)==1 || Points_of_enforcement_normal(i,2)== -1) {
+      counter = 2;
+    }
+    EQN_MAT_refine(span(i*3 ,i*3+2),span::all) = EQN_MAT_assembled(span(i*9 + counter*3,i*9 + counter*3+2),span::all);
+  }
+
+
   cout << "Starting Solving Linear Equations" << endl;
   Col<complex<T>> solid_point_strength_colvec = solve(EQN_MAT_assembled,STRESS_Col_ENFORCER);
   cout << "Completed Solving Linear Equations" << endl;
@@ -683,6 +698,8 @@ Mat<complex<T>> solve_dpsm_disp (const Mat<T> & ACTIVE_SOURCES_DPSM_POINT,const 
   cout << "Started Ctrating STR_MA" << endl;
   return(SOLID_STR_MAT);
 }
+
+
 
 template <typename T>
 Mat<complex<T>> disp_calc_3d_ver(const Mat<T> &ACTIVE_SOURCES_DPSM_POINT, const Mat<T> &Points_of_enforcement, const Mat<complex<T>> &ACTIVE_STR , T k_s,T k_p,T rho , T omega){

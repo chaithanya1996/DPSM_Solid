@@ -142,7 +142,7 @@ int main(){
   
   int S_1_X_DIVS = vec_mag<P_DTYPE>(S_1_vec_x - S_1_origin)/r_s_tran;
   int S_1_Y_DIVS = vec_mag<P_DTYPE>(S_1_vec_y - S_1_origin)/r_s_tran;
-  Row<P_DTYPE> S_1_normal = {1,0,1};
+  Row<P_DTYPE> S_1_normal = {0,0,1};
   Row<P_DTYPE> S_1_normal_reverse = {0,0,-1};
 
   Row<P_DTYPE> S_2_origin = {0,0,5*cm};
@@ -213,24 +213,25 @@ int main(){
 
   // Defining the Stress Coniditons
   
-  Mat<complex<P_DTYPE>> SURFACE_1_STR_BC(SURFACE_1_MAT.n_rows,3,fill::ones);
-  Mat<complex<P_DTYPE>> SURFACE_2_STR_BC(SURFACE_2_MAT.n_rows,3,fill::ones);
+  Mat<complex<P_DTYPE>> SURFACE_1_STR_BC(SURFACE_1_MAT.n_rows,3,fill::zeros);
+  Mat<complex<P_DTYPE>> SURFACE_2_STR_BC(SURFACE_2_MAT.n_rows,3,fill::zeros);
   Mat<complex<P_DTYPE>> SURFACE_3_STR_BC(SURFACE_3_MAT.n_rows,3,fill::zeros);
   Mat<complex<P_DTYPE>> SURFACE_4_STR_BC(SURFACE_4_MAT.n_rows,3,fill::zeros);
   Mat<complex<P_DTYPE>> SURFACE_5_STR_BC(SURFACE_5_MAT.n_rows,3,fill::zeros);
   Mat<complex<P_DTYPE>> SURFACE_6_STR_BC(SURFACE_6_MAT.n_rows,3,fill::zeros);
 
-  SURFACE_1_STR_BC = SURFACE_1_STR_BC * r_s_tran * 0.00001;
-  SURFACE_2_STR_BC = SURFACE_2_STR_BC * r_s_tran * 0.00001;  
- //  for (int i = 0; i < SURFACE_1_STR_BC.n_rows; ++i) {
- //      SURFACE_1_STR_BC(i,0) = 1 ;
- //      SURFACE_1_STR_BC(i,1) = 1 ;
- //  }
+  // SURFACE_1_STR_BC = SURFACE_1_STR_BC * r_s_tran * 0.00001;
+  // SURFACE_2_STR_BC = SURFACE_2_STR_BC * r_s_tran * 0.00001;  
+  for (int i = 0; i < SURFACE_1_STR_BC.n_rows; ++i) {
+    SURFACE_1_STR_BC(i,0) = SURFACE_1_MAT(i,0) *  r_s_tran* 0.001 + SURFACE_1_MAT(i,1) *  r_s_tran* 0.001 ;
+    SURFACE_1_STR_BC(i,1) = SURFACE_1_MAT(i,0) *  r_s_tran* 0.001 + SURFACE_1_MAT(i,1) *  r_s_tran* 0.001 ;
+  }
 
- //  for (int i = 0; i < SURFACE_2_STR_BC.n_rows; ++i) {
- //     SURFACE_2_STR_BC(i,0) = 1 ;
- //     SURFACE_2_STR_BC(i,1) = 1 ;
- // }
+  for (int i = 0; i < SURFACE_2_STR_BC.n_rows; ++i) {
+    SURFACE_2_STR_BC(i,0) = SURFACE_2_MAT(i,0) *  r_s_tran* 0.002 + SURFACE_2_MAT(i,1) *  r_s_tran* 0.002 ;
+    SURFACE_2_STR_BC(i,2) = SURFACE_2_MAT(i,0) *  r_s_tran* 0.002 + SURFACE_2_MAT(i,1) *  r_s_tran* 0.002 ;
+  }
+
 
   cout << " Start Stiching" << endl;
   
@@ -316,5 +317,6 @@ int main(){
   Mat<complex<P_DTYPE>> DISP__CALC_ON_ACTIVE = disp_calc_3d_ver<P_DTYPE>(ACTIVE_SOURCES_DPSM, ACTIVE_SOURCES,Result, k_s_aluminium,k_p_aluminium,rho_al,omega_trans);
   Mat<P_DTYPE> ABS_DISP_ACTIVE =  abs(DISP__CALC_ON_ACTIVE);
   ABS_DISP_ACTIVE.save("DBUG_ACTIVE_DISP.csv",csv_ascii);
+  //vector<P_DTYPE> DISP_OBS_CAL_stress_stress = {0,0,0};
   // cout << Result << endl;
  }

@@ -67,7 +67,7 @@ inline TYPE calc_mu (TYPE E, TYPE V ){
 int main(){
 
   // Controlling Parameters For OpenMP
-  omp_set_num_threads(8);
+  omp_set_num_threads(16);
 
 
    
@@ -140,7 +140,7 @@ int main(){
   
   int S_1_X_DIVS = vec_mag<P_DTYPE>(S_1_vec_x - S_1_origin)/r_s_tran;
   int S_1_Y_DIVS = vec_mag<P_DTYPE>(S_1_vec_y - S_1_origin)/r_s_tran;
-  Row<P_DTYPE> S_1_normal = {1,0,1};
+  Row<P_DTYPE> S_1_normal = {0,0,1};
   Row<P_DTYPE> S_1_normal_reverse = {0,0,-1};
 
   Row<P_DTYPE> S_2_origin = {0,0,5*cm};
@@ -209,6 +209,33 @@ int main(){
   Mat<P_DTYPE> SURFACE_5_MAT_DPSM_SOURCE = source_point_placer<P_DTYPE>(SURFACE_5_MAT, S_5_normal_reverse, r_s_tran);
   Mat<P_DTYPE> SURFACE_6_MAT_DPSM_SOURCE = source_point_placer<P_DTYPE>(SURFACE_6_MAT, S_6_normal_reverse, r_s_tran);
 
+  Mat<P_DTYPE> SURFACE_1_MAT_DPSM_SOURCE_NORMAL(size(SURFACE_1_MAT_DPSM_SOURCE));
+  Mat<P_DTYPE> SURFACE_2_MAT_DPSM_SOURCE_NORMAL(size(SURFACE_2_MAT_DPSM_SOURCE));
+  Mat<P_DTYPE> SURFACE_3_MAT_DPSM_SOURCE_NORMAL(size(SURFACE_3_MAT_DPSM_SOURCE));
+  Mat<P_DTYPE> SURFACE_4_MAT_DPSM_SOURCE_NORMAL(size(SURFACE_4_MAT_DPSM_SOURCE));
+  Mat<P_DTYPE> SURFACE_5_MAT_DPSM_SOURCE_NORMAL(size(SURFACE_5_MAT_DPSM_SOURCE));
+  Mat<P_DTYPE> SURFACE_6_MAT_DPSM_SOURCE_NORMAL(size(SURFACE_6_MAT_DPSM_SOURCE));
+
+  for (int i = 0; i < SURFACE_1_MAT_DPSM_SOURCE.n_rows; ++i) {
+    SURFACE_1_MAT_DPSM_SOURCE_NORMAL.row(i) = S_1_normal;
+  }
+  for (int i = 0; i < SURFACE_2_MAT_DPSM_SOURCE.n_rows; ++i) {
+    SURFACE_2_MAT_DPSM_SOURCE_NORMAL.row(i) = S_2_normal;
+  }
+  for (int i = 0; i < SURFACE_3_MAT_DPSM_SOURCE.n_rows; ++i) {
+    SURFACE_3_MAT_DPSM_SOURCE_NORMAL.row(i) = S_3_normal;
+  }
+  for (int i = 0; i < SURFACE_4_MAT_DPSM_SOURCE.n_rows; ++i) {
+    SURFACE_4_MAT_DPSM_SOURCE_NORMAL.row(i) = S_4_normal;
+  }
+  for (int i = 0; i < SURFACE_5_MAT_DPSM_SOURCE.n_rows; ++i) {
+    SURFACE_5_MAT_DPSM_SOURCE_NORMAL.row(i) = S_5_normal;
+  }
+  for (int i = 0; i < SURFACE_6_MAT_DPSM_SOURCE.n_rows; ++i) {
+    SURFACE_6_MAT_DPSM_SOURCE_NORMAL.row(i) = S_6_normal;
+  }
+
+
   // Defining the Stress Coniditons
   
   cx_3d<P_DTYPE> SURFACE_1_STR_BC(SURFACE_1_MAT_DPSM_SOURCE.n_rows,Mat<complex<P_DTYPE>>(3,3,fill::zeros));
@@ -220,14 +247,12 @@ int main(){
 
   
   for (int i = 0; i < SURFACE_1_MAT_DPSM_SOURCE.n_rows; ++i) {
-    SURFACE_1_STR_BC[i](2,0) = 1 ;
-    SURFACE_1_STR_BC[i](2,1) = 1 ;
+    SURFACE_1_STR_BC[i](2,2) = 1000000 ;
   }
 
 
   for (int i = 0; i < SURFACE_2_MAT_DPSM_SOURCE.n_rows; ++i) {
-    SURFACE_2_STR_BC[i](2,0) = 1 ;
-    SURFACE_2_STR_BC[i](2,1) = 1 ;
+    SURFACE_2_STR_BC[i](2,2) =  - 1000000 ;
   }
 
   
@@ -594,7 +619,7 @@ int main(){
 
 
 
-  Mat<P_DTYPE> ACTIVE_SOURCES,ACTIVE_SOURCES_DPSM;
+  Mat<P_DTYPE> ACTIVE_SOURCES,ACTIVE_SOURCES_DPSM,ACTIVE_SOURCES_DPSM_NORMAL;
 
 
   ACTIVE_SOURCES = join_cols(SURFACE_1_MAT,SURFACE_2_MAT);
@@ -621,6 +646,13 @@ int main(){
   ACTIVE_SOURCES_DPSM = join_cols(ACTIVE_SOURCES_DPSM,SURFACE_4_MAT_DPSM_SOURCE);
   ACTIVE_SOURCES_DPSM = join_cols(ACTIVE_SOURCES_DPSM,SURFACE_5_MAT_DPSM_SOURCE);
   ACTIVE_SOURCES_DPSM = join_cols(ACTIVE_SOURCES_DPSM,SURFACE_6_MAT_DPSM_SOURCE);
+
+  ACTIVE_SOURCES_DPSM_NORMAL = join_cols(SURFACE_1_MAT_DPSM_SOURCE_NORMAL,SURFACE_2_MAT_DPSM_SOURCE_NORMAL);
+  ACTIVE_SOURCES_DPSM_NORMAL = join_cols(ACTIVE_SOURCES_DPSM_NORMAL,SURFACE_3_MAT_DPSM_SOURCE_NORMAL);
+  ACTIVE_SOURCES_DPSM_NORMAL = join_cols(ACTIVE_SOURCES_DPSM_NORMAL,SURFACE_4_MAT_DPSM_SOURCE_NORMAL);
+  ACTIVE_SOURCES_DPSM_NORMAL = join_cols(ACTIVE_SOURCES_DPSM_NORMAL,SURFACE_5_MAT_DPSM_SOURCE_NORMAL);
+  ACTIVE_SOURCES_DPSM_NORMAL = join_cols(ACTIVE_SOURCES_DPSM_NORMAL,SURFACE_6_MAT_DPSM_SOURCE_NORMAL);
+
 
   cout << " Joining the Stress Conditions" << endl;
 
@@ -671,7 +703,7 @@ int main(){
   
   Mat<P_DTYPE> PASS_SOURCES(0,0,fill::zeros);
   
-  Mat<complex<P_DTYPE>> Result =  solve_dpsm_str<P_DTYPE>(ACTIVE_SOURCES_DPSM,PASS_SOURCES,ACTIVE_STRESS_BC,ACTIVE_SOURCES,k_s_aluminium,k_p_aluminium,rho_al,omega_trans,mu_al,lamda_al);
+  Mat<complex<P_DTYPE>> Result =  solve_dpsm_str<P_DTYPE>(ACTIVE_SOURCES_DPSM,PASS_SOURCES,ACTIVE_STRESS_BC,ACTIVE_SOURCES,k_s_aluminium,k_p_aluminium,rho_al,omega_trans,mu_al,lamda_al,ACTIVE_SOURCES_DPSM_NORMAL);
   Result.save("D_BUG_Result.csv",csv_ascii);
 
   // Mat<P_DTYPE> Observation_point = {{10*cm,10*cm,0},{5*cm,5*cm,0}};
