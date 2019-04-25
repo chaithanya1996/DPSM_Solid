@@ -18,14 +18,13 @@ Written By :
 
 
 #include<iostream>
-#include "dpsm_core.hpp"
+#include "dpsm_post.hpp"
 #include <omp.h>
 
 using std::cout;
 using std::endl;
 using std::cin;
 using std::pow;
-using std::vector;
 
 // Wrtiting Log Files
 
@@ -706,12 +705,59 @@ int main(){
   Mat<complex<P_DTYPE>> Result =  solve_dpsm_str<P_DTYPE>(ACTIVE_SOURCES_DPSM,PASS_SOURCES,ACTIVE_STRESS_BC,ACTIVE_SOURCES,k_s_aluminium,k_p_aluminium,rho_al,omega_trans,mu_al,lamda_al,ACTIVE_SOURCES_DPSM_NORMAL);
   Result.save("D_BUG_Result.csv",csv_ascii);
 
+  // genrating the Surfaes
+    
+  Row<P_DTYPE> S_OBS_origin = {10*cm,0,0};
+  Row<P_DTYPE> S_OBS_vec_x = {10*cm,20*cm,0};
+  Row<P_DTYPE> S_OBS_vec_y = {10*cm,0,5*cm};
+  
+  int S_OBS_X_DIVS = vec_mag<P_DTYPE>(S_OBS_vec_x - S_OBS_origin)/r_s_tran;
+  int S_OBS_Y_DIVS = vec_mag<P_DTYPE>(S_OBS_vec_y - S_OBS_origin)/r_s_tran;
+  Row<P_DTYPE> S_OBS_normal = {1,0,0};
+  Row<P_DTYPE> S_OBS_normal_reverse = {-1,0,0};
+
+
+  
+  // Generating the Surfaces
+  int X_OBSERVE = S_OBS_X_DIVS * 20;
+  int Y_OBSERVE = S_OBS_Y_DIVS * 10;
+  
+  Mat<P_DTYPE> SURFACE_OBS_MAT =  rectangle_generator<P_DTYPE>( S_OBS_vec_x, S_OBS_vec_y, S_OBS_origin ,X_OBSERVE,Y_OBSERVE);
+  SURFACE_OBS_MAT.save("OBS_SURFACE.csv",csv_ascii);
+  
+
+  // Calculating DISPLACEMENT
+  
+  Mat<complex<P_DTYPE>> DISP_OBS_CAL = disp_calc_3d_ver<P_DTYPE>(ACTIVE_SOURCES_DPSM, SURFACE_OBS_MAT,Result, k_s_aluminium,k_p_aluminium,rho_al,omega_trans);
+  Mat<P_DTYPE> DISP_OBS_CAL_ABS = abs(DISP_OBS_CAL);
+  DISP_OBS_CAL_ABS.save("OBS_DISP.csv",csv_ascii);
+
+  // SAVING POST PROCEE
+  string PATH_STRING = "./";
+  string FILE_NAME_STRING = "DISPLACEMENT_";
+  DPSM_POST_PROCESS( X_OBSERVE, Y_OBSERVE,SURFACE_OBS_MAT,DISP_OBS_CAL_ABS,PATH_STRING,FILE_NAME_STRING);
+
+  cx_3d<P_DTYPE> DISP_OBS_CAL_stress = stress_calc_3d_ver<P_DTYPE>(ACTIVE_SOURCES_DPSM, SURFACE_OBS_MAT,Result, k_s_aluminium,k_p_aluminium,rho_al,omega_trans,mu_al,lamda_al);
+  vector<Mat<P_DTYPE>> DISP_OBS_CAL_stress_stress(DISP_OBS_CAL_stress.size(),Mat<P_DTYPE>(3,3));
+  for(size_t i = 0; i < DISP_OBS_CAL_stress.size(); i++)
+  {
+    DISP_OBS_CAL_stress_stress[i] = abs(DISP_OBS_CAL_stress[i]);
+  }
+  
+  // save_cx_3d(DISP_OBS_CAL_stress_stress, "OBS_STRESS.csv");
+  Mat<P_DTYPE> STRESS_MAT_POST = STRESS_POST_PROCESS(DISP_OBS_CAL_stress_stress);
+  // Mat<complex<P_DTYPE>> DISP__CALC_ON_ACTIVE = disp_calc_3d_ver<P_DTYPE>(ACTIVE_SOURCES_DPSM, ACTIVE_SOURCES,Result, k_s_aluminium,k_p_aluminium,rho_al,omega_trans);
+  // Mat<P_DTYPE> ABS_DISP_ACTIVE =  abs(DISP__CALC_ON_ACTIVE);
+  // ABS_DISP_ACTIVE.save("DBUG_ACTIVE_DISP.csv",csv_ascii);
+  string FILE_STRING_STRESS = "STRESS_";
+  DPSM_POST_PROCESS( X_OBSERVE, Y_OBSERVE,SURFACE_OBS_MAT,STRESS_MAT_POST,PATH_STRING,FILE_STRING_STRESS);
+
   // Mat<P_DTYPE> Observation_point = {{10*cm,10*cm,0},{5*cm,5*cm,0}};
 
   // cx_3d<P_DTYPE> DBUG_Stress_Result = stress_from_points<P_DTYPE>(ACTIVE_SOURCES_DPSM ,Result , Observation_point ,k_s_aluminium,k_p_aluminium,rho_al,omega_trans,lamda_al,mu_al);
   // int Sucess = save_cx_3d<complex<P_DTYPE>>(DBUG_Stress_Result,"./");
 
-  cx_3d<P_DTYPE> Stress_CALC_ON_ACTIVE = stress_calc_3d_ver<P_DTYPE>(ACTIVE_SOURCES_DPSM, ACTIVE_SOURCES,Result, k_s_aluminium,k_p_aluminium,rho_al,omega_trans,mu_al,lamda_al);
-  int Sucess = save_cx_3d<complex<P_DTYPE>>(Stress_CALC_ON_ACTIVE,"./");
+  // cx_3d<P_DTYPE> Stress_CALC_ON_ACTIVE = stress_calc_3d_ver<P_DTYPE>(ACTIVE_SOURCES_DPSM, ACTIVE_SOURCES,Result, k_s_aluminium,k_p_aluminium,rho_al,omega_trans,mu_al,lamda_al);
+  //int Sucess = save_cx_3d<complex<P_DTYPE>>(Stress_CALC_ON_ACTIVE,"./");
   cout << "Sucess Reading " << endl;	
  }

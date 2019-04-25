@@ -12,7 +12,6 @@ using std::vector;
 // Wrtiting Log Files
 
 using std::cerr;
-using std::endl;
 #include <fstream>
 using std::ofstream;
 #include <cstdlib>
@@ -21,18 +20,6 @@ using std::ofstream;
 
 // This function is not working in the header file
 
-
-template <typename T>
-cx_3d<T> join_cx_3d(cx_3d<T> former, cx_3d<T> latter){
-
-  // vector<Mat<complex<T>>> combined;
-  cx_3d<T> combined;
-  combined.reserve( former.size() + latter.size() ); // preallocate memory
-  combined.insert( combined.end(), former.begin(), former.end() );
-  combined.insert( combined.end(), latter.begin(), latter.end() );
-
- return(combined);
-}
 
 
 template <typename TYPE>
@@ -123,39 +110,70 @@ int main(int argc, char** argv){
   // Generating the Surfaces
   Mat<P_DTYPE> SURFACE_OBS_MAT =  rectangle_generator<P_DTYPE>( S_OBS_vec_x, S_OBS_vec_y, S_OBS_origin ,XDIVS, YDIVS);
 
+  // Mat<P_DTYPE> LOAD_MAT;
+  // LOAD_MAT.load(argv[1],csv_ascii);
+  // cout << argv[0] << endl;
+  // cout << LOAD_MAT.n_rows << endl;
+  // cout << LOAD_MAT.n_cols << endl;
+  
+  // Col<P_DTYPE> COL_1 = LOAD_MAT.col(0);
+  // Col<P_DTYPE> COL_2 = LOAD_MAT.col(1);
+  // Col<P_DTYPE> COL_3 = LOAD_MAT.col(2);
+  
+  // Mat<P_DTYPE> MESH_GRID_X(YDIVS,XDIVS ,fill::zeros);
+  // Mat<P_DTYPE> MESH_GRID_Y(YDIVS,XDIVS ,fill::zeros);
+  // Mat<P_DTYPE> MESH_GRID_Z(YDIVS,XDIVS ,fill::zeros);
+  
+  // Mat<P_DTYPE> MESH_GRID_DISP_1(YDIVS,XDIVS,fill::zeros);
+  // Mat<P_DTYPE> MESH_GRID_DISP_2(YDIVS,XDIVS,fill::zeros);
+  // Mat<P_DTYPE> MESH_GRID_DISP_3(YDIVS,XDIVS,fill::zeros);
+  
+  // for (int i= 0; i < YDIVS; ++i) {
+  //   cout << i << endl;
+  //   MESH_GRID_DISP_1.row(i) = trans(COL_1(span(i*XDIVS,(i+1) * XDIVS - 1)));
+  //   MESH_GRID_DISP_2.row(i) = trans(COL_2(span(i*XDIVS,(i+1) * XDIVS - 1)));
+  //   MESH_GRID_DISP_3.row(i) = trans(COL_3(span(i*XDIVS,(i+1) * XDIVS - 1)));
+  //   MESH_GRID_X.row(i) = trans(SURFACE_OBS_MAT(span(i*XDIVS,(i+1) * XDIVS - 1),0));
+  //   MESH_GRID_Y.row(i) = trans(SURFACE_OBS_MAT(span(i*XDIVS,(i+1) * XDIVS -1 ),1));
+  //   MESH_GRID_Z.row(i) = trans( SURFACE_OBS_MAT(span(i*XDIVS,(i+1) * XDIVS -1 ),2));
+  // }
+  // MESH_GRID_DISP_1.save("MESH_GRID_DISP_1.csv",csv_ascii);
+  // MESH_GRID_DISP_2.save("MESH_GRID_DISP_2.csv",csv_ascii);
+  // MESH_GRID_DISP_3.save("MESH_GRID_DISP_3.csv",csv_ascii);
+  // MESH_GRID_X.save("MESH_GRID_X.csv",csv_ascii);
+  // MESH_GRID_Y.save("MESH_GRID_Y.csv",csv_ascii);
+  // MESH_GRID_Z.save("MESH_GRID_Z.csv",csv_ascii);
+
   Mat<P_DTYPE> LOAD_MAT;
   LOAD_MAT.load(argv[1],csv_ascii);
   cout << argv[0] << endl;
   cout << LOAD_MAT.n_rows << endl;
   cout << LOAD_MAT.n_cols << endl;
+
   
   Col<P_DTYPE> COL_1 = LOAD_MAT.col(0);
-  Col<P_DTYPE> COL_2 = LOAD_MAT.col(1);
-  Col<P_DTYPE> COL_3 = LOAD_MAT.col(2);
-  
   Mat<P_DTYPE> MESH_GRID_X(YDIVS,XDIVS ,fill::zeros);
   Mat<P_DTYPE> MESH_GRID_Y(YDIVS,XDIVS ,fill::zeros);
   Mat<P_DTYPE> MESH_GRID_Z(YDIVS,XDIVS ,fill::zeros);
   
   Mat<P_DTYPE> MESH_GRID_DISP_1(YDIVS,XDIVS,fill::zeros);
-  Mat<P_DTYPE> MESH_GRID_DISP_2(YDIVS,XDIVS,fill::zeros);
-  Mat<P_DTYPE> MESH_GRID_DISP_3(YDIVS,XDIVS,fill::zeros);
-  
+
   for (int i= 0; i < YDIVS; ++i) {
     cout << i << endl;
     MESH_GRID_DISP_1.row(i) = trans(COL_1(span(i*XDIVS,(i+1) * XDIVS - 1)));
-    MESH_GRID_DISP_2.row(i) = trans(COL_2(span(i*XDIVS,(i+1) * XDIVS - 1)));
-    MESH_GRID_DISP_3.row(i) = trans(COL_3(span(i*XDIVS,(i+1) * XDIVS - 1)));
+    // MESH_GRID_DISP_2.row(i) = trans(COL_2(span(i*XDIVS,(i+1) * XDIVS - 1)));
+    // MESH_GRID_DISP_3.row(i) = trans(COL_3(span(i*XDIVS,(i+1) * XDIVS - 1)));
     MESH_GRID_X.row(i) = trans(SURFACE_OBS_MAT(span(i*XDIVS,(i+1) * XDIVS - 1),0));
     MESH_GRID_Y.row(i) = trans(SURFACE_OBS_MAT(span(i*XDIVS,(i+1) * XDIVS -1 ),1));
     MESH_GRID_Z.row(i) = trans( SURFACE_OBS_MAT(span(i*XDIVS,(i+1) * XDIVS -1 ),2));
   }
   MESH_GRID_DISP_1.save("MESH_GRID_DISP_1.csv",csv_ascii);
-  MESH_GRID_DISP_2.save("MESH_GRID_DISP_2.csv",csv_ascii);
-  MESH_GRID_DISP_3.save("MESH_GRID_DISP_3.csv",csv_ascii);
+  // MESH_GRID_DISP_2.save("MESH_GRID_DISP_2.csv",csv_ascii);
+  // MESH_GRID_DISP_3.save("MESH_GRID_DISP_3.csv",csv_ascii);
   MESH_GRID_X.save("MESH_GRID_X.csv",csv_ascii);
   MESH_GRID_Y.save("MESH_GRID_Y.csv",csv_ascii);
   MESH_GRID_Z.save("MESH_GRID_Z.csv",csv_ascii);
+
 }
    
  
