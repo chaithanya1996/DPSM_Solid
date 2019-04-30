@@ -564,8 +564,9 @@ Mat<complex<T>> solve_dpsm_str (const Mat<T> & ACTIVE_SOURCES_DPSM_POINT,const M
     EQN_MAT_assembled.save("DBUG_Giii_A_MATRIX.csv",csv_ascii);
     STRESS_Col_ENFORCER.save("DBUG_Giii_B_MATRIX.csv",csv_ascii);
     cout << "Completed Writing To Disk " << endl;
+
   }
-  cout << "lapa" << endl;
+  //cout << "lapa" << endl;
   Mat<complex<T>> EQN_MAT_refine(STRESS_CX_3D_MATRIX.size()*3,ACTIVE_SOURCES_DPSM_POINT.n_rows * 3,fill::zeros);
   
   for (int i=0; i < Points_of_enforcement.n_rows; ++i) {

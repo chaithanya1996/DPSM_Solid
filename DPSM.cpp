@@ -250,9 +250,9 @@ int main(){
   }
 
 
-  for (int i = 0; i < SURFACE_2_MAT_DPSM_SOURCE.n_rows; ++i) {
-    SURFACE_2_STR_BC[i](2,2) =  - 1000000 ;
-  }
+  // for (int i = 0; i < SURFACE_2_MAT_DPSM_SOURCE.n_rows; ++i) {
+  //   SURFACE_2_STR_BC[i](2,2) =  - 1000000 ;
+  // }
 
   
     /*==================================================*/
@@ -702,9 +702,11 @@ int main(){
   
   Mat<P_DTYPE> PASS_SOURCES(0,0,fill::zeros);
   
-  Mat<complex<P_DTYPE>> Result =  solve_dpsm_str<P_DTYPE>(ACTIVE_SOURCES_DPSM,PASS_SOURCES,ACTIVE_STRESS_BC,ACTIVE_SOURCES,k_s_aluminium,k_p_aluminium,rho_al,omega_trans,mu_al,lamda_al,ACTIVE_SOURCES_DPSM_NORMAL);
+  Mat<complex<P_DTYPE>> Result =  solve_dpsm_str<P_DTYPE>(ACTIVE_SOURCES_DPSM,PASS_SOURCES,ACTIVE_STRESS_BC,ACTIVE_SOURCES,k_s_aluminium,k_p_aluminium,rho_al,omega_trans,mu_al,lamda_al,ACTIVE_SOURCES_DPSM_NORMAL,true);
+  
+  cout << "Writing Result" << endl;
   Result.save("D_BUG_Result.csv",csv_ascii);
-
+  cout << "Completed Writing Result" << endl;
   // genrating the Surfaes
     
   Row<P_DTYPE> S_OBS_origin = {10*cm,0,0};
